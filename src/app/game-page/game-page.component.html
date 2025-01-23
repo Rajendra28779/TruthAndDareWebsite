@@ -8,22 +8,27 @@
       <div
         *ngFor="let name of row"
         class="cell"
-        [class.active]="name === activeName">
-        {{ name || 'Empty' }}
+        [class.active]="name?.name === activeName">
+        {{ name?.name || 'Empty' }}
       </div>
     </div>
   </div>
   <ng-container  *ngIf="names.length <= 3">
     <div *ngFor="let name of names" class="cell2 mt-2"
-    [class.active]="name === activeName"> {{ name || 'Empty' }} </div>
+    [class.active]="name?.name === activeName"> {{ name?.name || 'Empty' }} </div>
   </ng-container>
 
 
   <!-- Random Selection Button -->
-  <button (click)="spin()" class="spin-button me-2">Spin</button>
+  <button (click)="handleButtonClick()" class="spin-button me-2">Spin</button>
+  <div id="overlay" class="overlay" style="display: none;">
+    <img src="../../assets/image/bottol-image.png" alt="Bottle"
+      class="rotating-image" id="rotateimage" />
+  </div>
+  <audio id="buttonSound" src="../../assets/image/bottol_audio.mp3"></audio>
 
   <div class="row mt-3" style="display: flex;" *ngIf="!showbtn" >
-    <button (click)="showresult()" class="btn btn-info">Result</button>
+    <button (click)="showresult()" class="btn btn-info" *ngIf="names.length <= 3">Result</button>
   </div>
   <div class="row mt-3" style="display: flex;" *ngIf="showbtn">
     <button (click)="truthdata()" class="btn btn-primary">Truth</button>

@@ -9,10 +9,10 @@ declare let $: any;
   styleUrls: ['./game-page.component.scss']
 })
 export class GamePageComponent {
-  names: string[] = [];
+  names: any[] = [];
   scorelist: any[] = [];
-  newName: string = ''; // New name input
-  activeName: string | null = null; // Highlighted name
+  newName: any = ''; // New name input
+  activeName: any=""; // Highlighted name
   staticno:any=0;
   showbtn:any=false;
   truthlist:any=[];
@@ -21,21 +21,22 @@ export class GamePageComponent {
   resultmessage:any="";
 
 
-  constructor(private dareserv:DateService) { }
+  constructor(private readonly dareserv:DateService) { }
 
   ngOnInit(): void {
     let cat:any = localStorage.getItem('catgory');
     let gender1:any = sessionStorage.getItem('gerder');
-    let data:any = sessionStorage.getItem("name");
-    this.names = JSON.parse(data);
-
-    for(let element of this.names) {
-      let obj:any ={
-        name:element,
-        score:0
+    let data:any=sessionStorage.getItem("name"); 
+      this.names = JSON.parse(data);
+      for(let element of this.names) {
+        let obj:any ={
+          name:element.name,
+          gender:element.gender,
+          score:0
+        }
+        this.scorelist.push(obj);
       }
-      this.scorelist.push(obj);
-    }
+    
     sessionStorage.setItem('score',JSON.stringify(this.scorelist));
 
     if(cat == 1){
@@ -63,11 +64,14 @@ export class GamePageComponent {
       this.darelist = this.dareserv.honeymoondarelist;
     }
 
+
+    $('rotateimage').hide();
+
   }
 
   // Get rows for the grid
-  getRows(): string[][] {
-    const rows: string[][] = [];
+  getRows(): any[][] {
+    const rows: any[][] = [];
     for (let i = 0; i < 9; i += 3) {
       rows.push(this.names.slice(i, i + 3));
     }
@@ -75,18 +79,37 @@ export class GamePageComponent {
   }
 
   // Select a name manually
-  selectName(name: string) {
+  selectName(name: any) {
     this.activeName = name;
   }
 
-  // Highlight a random name
+  handleButtonClick() {
+  this.activettask="";
+    const image = document.getElementById("overlay") as HTMLImageElement;
+    const audio = document.getElementById("buttonSound") as HTMLAudioElement;
+
+  // Play the sound effect
+  audio.currentTime = 0; // Reset the audio to the beginning
+  audio.play();
+
+  // Show the rotating image
+  image.style.display = "block";
+
+  // Stop the image rotation and hide it after 3 seconds
+    setTimeout(() => {
+      image.style.display = "none"; // Hide the image
+      audio.pause(); // Stop the audio
+      audio.currentTime = 0; // Reset the audio
+      this.spin(); // Call your custom method
+    }, 2000);
+  }
 
   spin() {
     if (this.names.length > 3) {
       const randomIndex = Math.floor(Math.random() * this.names.length);
-      this.activeName = this.names[randomIndex];
+      this.activeName = this.names[randomIndex].name;
     }else{
-      this.activeName = this.names[this.staticno];
+      this.activeName = this.names[this.staticno].name;
       this.staticno=this.staticno+1;
       if(this.staticno>this.names.length - 1){
         this.staticno=0;
@@ -124,8 +147,6 @@ export class GamePageComponent {
       if(element.name == this.activeName){
         if(no==1){
           element.score=element.score+no;
-        }else{
-          element.score=element.score-1;
         }
         break;
       }
@@ -139,7 +160,7 @@ export class GamePageComponent {
     $('#showresult').show();
     let score:any = sessionStorage.getItem("score");
     this.scorelist = JSON.parse(score);
-    this.scorelist.sort((a:any, b:any) => a.score - b.score);
+    this.scorelist.sort((a:any, b:any) => b.score - a.score);
   }
 
   closemodal(){

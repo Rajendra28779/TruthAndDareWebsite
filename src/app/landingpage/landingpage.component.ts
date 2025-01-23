@@ -14,8 +14,9 @@ export class LandingpageComponent {
   show1st:any=true;
   cat:any;
   showgender:any=false;
+  genderval:any=0;
 
-  constructor(private route : Router) { }
+  constructor(private readonly route : Router) { }
 
   ngOnInit(): void {
     sessionStorage.clear();
@@ -25,7 +26,7 @@ export class LandingpageComponent {
 
   addname(){
     if(this.nameList.length > 8){
-      this.message = "Maximum 8 people Allowed !"
+      this.message = "Maximum 9 people Allowed !"
       $('#name').val('');
       return ;
     }
@@ -42,12 +43,6 @@ export class LandingpageComponent {
       this.nameList.push(name);
       $('#name').val('');
     }
-
-    if(this.cat == 5 || this.cat == 6){
-      if(this.nameList.length == 2){
-       this.next();
-      }
-    }
   }
 
   removename(item:any){
@@ -62,6 +57,7 @@ export class LandingpageComponent {
   }
 
   catgory(no:any){
+    this.cat=no;
     localStorage.setItem('catgory',no);
     this.show1st=false;
     if(no == 5 || no == 6){
@@ -78,11 +74,62 @@ export class LandingpageComponent {
   }
 
   next(){
-    sessionStorage.setItem('name',JSON.stringify(this.nameList));
+    if(this.cat==2 && (this.genderval == 0 || this.genderval == undefined)){
+      this.message = "Please Specify Gender."
+      return;
+    }
+    sessionStorage.removeItem('name');
+    sessionStorage.removeItem('gerder');
+    let nameobjlist:any=[];
+
+    for (let element of this.nameList){
+      let obj:any ={
+        name:element,
+        gender:''
+      }
+      nameobjlist.push(obj);
+    }
+    sessionStorage.setItem('name',JSON.stringify(nameobjlist));
+    sessionStorage.setItem('gerder',this.genderval);
     this.route.navigate(['/gamepage'])
   }
 
   next1(){
+    sessionStorage.removeItem('name');
 
+    let boyname = $('#malename').val();
+    let girlname = $('#femalename').val();
+
+    if(boyname == null || boyname == undefined || boyname == ""){
+      $('#malename').focus();
+      this.message = "Please enter Name ."
+      return;
+    }
+    if(girlname == null || girlname == undefined || girlname == ""){
+      $('#femalename').focus();
+      this.message = "Please enter Name ."
+      return;
+    }
+
+    let obj:any ={
+      name:boyname,
+      gender:'male'
+    }
+
+    let obj1:any ={
+      name:girlname,
+      gender:'female'
+    }
+
+    let duolist:any=[];
+    duolist.push(obj);
+    duolist.push(obj1);
+
+    sessionStorage.setItem('name',JSON.stringify(duolist));
+    this.route.navigate(['/gamepage'])
+  }
+
+  gend(no:any){
+    this.genderval=no;
   }
 }

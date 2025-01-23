@@ -14,6 +14,10 @@
 
 
 <div *ngIf="!show1st">
+    <div class="input-container" *ngIf="cat == 2">
+      <input type="radio" id="gender" name="gender" class="me-2" (click)="gend(1)"> <span class="radio me-5" >Only Boys</span>
+      <input type="radio" id="gender" name="gender" class="me-2" (click)="gend(2)"> <span class="radio" >Only Girls</span>
+    </div>
     <div class="input-container" *ngIf="!showgender">
       <input type="text" class="name" id="name" name="name" placeholder="Enter Name" autocomplete="off" maxlength="10">
       <button class="add-button" (keydown.enter)="addname()"  (click)="addname()">Add</button>
@@ -28,11 +32,11 @@
 
     <div *ngIf="showgender">
       <div class="input-container" >
-        <img src="../../assets/image/man.png" height="30px" width="30px" class="me-2" alt="image">
+        <img src="../../assets/image/man.png" height="30px" width="30px" class="me-2" alt="imagemen">
         <input type="text" class="name" id="malename" name="malename" placeholder="Enter Name" autocomplete="off" maxlength="10">
       </div>
       <div class="input-container" >
-        <img src="../../assets/image/woman-avatar.png" height="30px" width="30px" class="me-2" alt="image">
+        <img src="../../assets/image/woman-avatar.png" height="30px" width="30px" class="me-2" alt="imagewomen">
         <input type="text" class="name" id="femalename" name="femalename" placeholder="Enter Name" autocomplete="off" maxlength="10">
       </div>
     </div>
