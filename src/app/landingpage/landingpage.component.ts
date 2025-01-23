@@ -12,11 +12,14 @@ export class LandingpageComponent {
   nameList:any=[];
   message:any;
   show1st:any=true;
+  cat:any;
+  showgender:any=false;
 
   constructor(private route : Router) { }
 
   ngOnInit(): void {
     sessionStorage.clear();
+    this.cat = localStorage.getItem('catgory');
   }
 
 
@@ -39,6 +42,12 @@ export class LandingpageComponent {
       this.nameList.push(name);
       $('#name').val('');
     }
+
+    if(this.cat == 5 || this.cat == 6){
+      if(this.nameList.length == 2){
+       this.next();
+      }
+    }
   }
 
   removename(item:any){
@@ -55,6 +64,11 @@ export class LandingpageComponent {
   catgory(no:any){
     localStorage.setItem('catgory',no);
     this.show1st=false;
+    if(no == 5 || no == 6){
+      this.showgender=true;
+    }else{
+      this.showgender=false;
+    }
   }
 
   privious(){
@@ -66,5 +80,9 @@ export class LandingpageComponent {
   next(){
     sessionStorage.setItem('name',JSON.stringify(this.nameList));
     this.route.navigate(['/gamepage'])
+  }
+
+  next1(){
+
   }
 }
