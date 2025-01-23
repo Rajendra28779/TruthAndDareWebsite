@@ -3,22 +3,28 @@
 </div>
 <div class="user-friendly-box">
   <!-- Game Grid -->
-  <div class="game-box">
+  <div class="game-box" *ngIf="names.length > 3">
     <div *ngFor="let row of getRows(); let rowIndex = index" class="row">
       <div
         *ngFor="let name of row"
         class="cell"
-        [class.active]="name === activeName"
-        (click)="selectName(name)"
-      >
+        [class.active]="name === activeName">
         {{ name || 'Empty' }}
       </div>
     </div>
   </div>
+  <ng-container  *ngIf="names.length <= 3">
+    <div *ngFor="let name of names" class="cell2 mt-2"
+    [class.active]="name === activeName"> {{ name || 'Empty' }} </div>
+  </ng-container>
+
 
   <!-- Random Selection Button -->
-  <button (click)="spin()" class="spin-button">Spin</button>
+  <button (click)="spin()" class="spin-button me-2">Spin</button>
 
+  <div class="row mt-3" style="display: flex;" *ngIf="!showbtn" >
+    <button (click)="showresult()" class="btn btn-info">Result</button>
+  </div>
   <div class="row mt-3" style="display: flex;" *ngIf="showbtn">
     <button (click)="truthdata()" class="btn btn-primary">Truth</button>
     <button (click)="daredata()" class="btn btn-danger mt-2">Dare</button>
@@ -46,6 +52,47 @@
           <button (click)="daredata()" class="btn btn-danger mx-2 my-1">Change Dare</button>
           <button (click)="complete(1)" class="btn btn-success mx-2 my-1">Complete</button>
           <button (click)="complete(0)" class="btn btn-warning mx-2 my-1">Loss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="showresult" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+  style="backdrop-filter: blur(10px); ">
+  <div class="modal-dialog" style="max-width: 40%; margin-top: 100px;">
+    <div class="modal-content">
+      <div class="modal-body">
+        <img src="../assets/image/TRUThLogo.png" alt="logo" height="70px" width="200px">
+        <h5 style="font-weight: bold; font-style: italic; font-size: 24 px; color: #ec3d5a;">
+          Result
+        </h5>
+        <div class="table-responsive" style="margin-top:1ch;">
+          <table class="table table-striped" style="border: 1px solid #ddd;">
+            <caption></caption>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of scorelist ,index as i">
+                <td>{{item.name}}</td>
+                <!-- <td *ngIf="i==0">{{item.name}} &nbsp;&nbsp;<i class="bi bi-trophy-fill" style="color: rgb(0, 132, 255);"></i></td>
+                <td *ngIf="i!=0">{{item.name}}</td> -->
+                <td>{{item.score}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="row mt-2">
+          <h4 style="font-weight: bold; font-style: italic; font-size: 19 px;">
+            Play more, enjoy more !
+          </h4>
+          <p class="mt-2">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closemodal()"></button>
+          </p>
         </div>
       </div>
     </div>

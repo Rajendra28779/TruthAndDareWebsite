@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from "@angular/core";
+import { Router } from "@angular/router";
+
 declare let $:any;
 
 @Component({
@@ -15,8 +16,7 @@ export class LandingpageComponent {
   constructor(private route : Router) { }
 
   ngOnInit(): void {
-    let cat = localStorage.getItem('catgory');
-
+    sessionStorage.clear();
   }
 
 

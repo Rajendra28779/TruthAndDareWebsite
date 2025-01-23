@@ -34,6 +34,23 @@
   font-weight: bold;
 }
 
+.cell2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.cell2.active {
+  background-color: #f38ea8;
+  transform: scale(1.1);
+  font-weight: bold;
+}
+
 .spin-button {
   padding: 10px 20px;
   margin-top: 3ch;

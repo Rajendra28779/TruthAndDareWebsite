@@ -1,3 +1,4 @@
+
 import { Component } from '@angular/core';
 import { DateService } from '../date.service';
 declare let $: any;
@@ -17,6 +18,7 @@ export class GamePageComponent {
   truthlist:any=[];
   darelist:any=[];
   activettask:any="";
+  resultmessage:any="";
 
 
   constructor(private dareserv:DateService) { }
@@ -59,9 +61,6 @@ export class GamePageComponent {
     }else if (cat == 6){
       this.truthlist = this.dareserv.honeymoontruthlist;
       this.darelist = this.dareserv.honeymoondarelist;
-    }else{
-      this.truthlist = this.dareserv.friendlytruthList;
-      this.darelist = this.dareserv.friendlydareList;
     }
 
   }
@@ -118,7 +117,6 @@ export class GamePageComponent {
     $('#showcnct').hide();
     this.activettask = "";
     this.showbtn=false;
-    this.activeName="";
 
     let score:any = sessionStorage.getItem("score");
     this.scorelist = JSON.parse(score);
@@ -133,6 +131,19 @@ export class GamePageComponent {
       }
     }
     sessionStorage.setItem('score',JSON.stringify(this.scorelist));
+    this.activeName = "";
   }
 
+
+  showresult(){
+    $('#showresult').show();
+    let score:any = sessionStorage.getItem("score");
+    this.scorelist = JSON.parse(score);
+    this.scorelist.sort((a:any, b:any) => a.score - b.score);
+  }
+
+  closemodal(){
+    $('#showresult').hide();
+    $('#showcnct').hide()
+  }
 }
