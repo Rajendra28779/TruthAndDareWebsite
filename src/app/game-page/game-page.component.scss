@@ -66,3 +66,21 @@
 .spin-button:hover {
   background-color: #d64a4a;
 }
+
+
+.modal-dialog {
+  max-width: 40%;
+}
+
+@media (max-width: 768px) {
+  .modal-dialog {
+    max-width: 100%;
+  }
+}
+
+/* For mobile-sized screens */
+@media (max-width: 480px) {
+  .modal-dialog {
+    max-width: 100%;
+  }
+}
