@@ -1,0 +1,42 @@
+<div style="font-weight: bold; font-style: italic; color: #ec3d5a;">
+  "Life is more fun when you take risks—embrace the truth, dare to dream, and let the game begin!"
+</div>
+<div *ngIf="show1st">
+  <div class=" category-list mt-4">
+    <div class="category category1" (click)="catgory(1)">Friendly </div>
+    <div class="category category2" (click)="catgory(2)">Adult (Only Boys Or Only Girls) </div>
+    <div class="category category3" (click)="catgory(3)">Adult (Boys and Girls) Normal</div>
+    <div class="category category4" (click)="catgory(4)">Adult (Boys and Girls) 18+</div>
+    <div class="category category5" (click)="catgory(5)">Duo (Boy and Girl)</div>
+    <div class="category category6" (click)="catgory(6)">Dirty Couple (Honeymoon)</div>
+  </div>
+</div>
+
+
+<div *ngIf="!show1st">
+    <div class="input-container">
+      <input type="text" id="name" name="name" placeholder="Enter Name" autocomplete="off" maxlength="10">
+      <button class="add-button" (keydown.enter)="addname()"  (click)="addname()">Add</button>
+    </div>
+
+    <div class="name-list">
+      <ng-container *ngFor="let item of nameList">
+        <div class="chip">{{item}} &nbsp;
+          <span class="remove-icon" class="btn-close" aria-label="Close" (click)="removename(item)"></span></div>
+      </ng-container>
+    </div>
+
+    <div *ngIf="message!=null">
+      <p style="color: red; text-align: end; font-weight: bolder; font-style: italic;">{{message}}</p>
+    </div>
+
+    <div class="row mt-4 " style="display: flex;">
+      <div class="col-6" style="text-align:left;">
+        <button class="btn btn-primary" style="border-radius: 50px;" (click)="privious()">Back</button>
+      </div>
+      <div class="col-6" *ngIf="nameList.length>1" style="text-align: end;">
+        <button class="btn btn-success" style="border-radius: 50px;" (click)="next()">lets Start </button>
+      </div>
+    </div>
+
+</div>

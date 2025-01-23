@@ -1,0 +1,51 @@
+.user-friendly-box {
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.game-box {
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 7px;
+  width: 300px;
+  margin-top: 3ch;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 60px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.cell.active {
+  background-color: #f38ea8;
+  transform: scale(1.1);
+  font-weight: bold;
+}
+
+.spin-button {
+  padding: 10px 20px;
+  margin-top: 3ch;
+  font-size: 16px;
+  color: #fff;
+  background-color: #a72929;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.spin-button:hover {
+  background-color: #d64a4a;
+}

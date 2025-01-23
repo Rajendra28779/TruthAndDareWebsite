@@ -1,0 +1,53 @@
+<div style="font-weight: bold; font-style: italic; color: #ec3d5a;">
+  let's Play And Enjoy.
+</div>
+<div class="user-friendly-box">
+  <!-- Game Grid -->
+  <div class="game-box">
+    <div *ngFor="let row of getRows(); let rowIndex = index" class="row">
+      <div
+        *ngFor="let name of row"
+        class="cell"
+        [class.active]="name === activeName"
+        (click)="selectName(name)"
+      >
+        {{ name || 'Empty' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Random Selection Button -->
+  <button (click)="spin()" class="spin-button">Spin</button>
+
+  <div class="row mt-3" style="display: flex;" *ngIf="showbtn">
+    <button (click)="truthdata()" class="btn btn-primary">Truth</button>
+    <button (click)="daredata()" class="btn btn-danger mt-2">Dare</button>
+  </div>
+</div>
+
+
+
+<div class="modal" id="showcnct" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+  style="backdrop-filter: blur(10px); ">
+  <div class="modal-dialog" style="max-width: 50%; margin-top: 100px;">
+    <div class="modal-content">
+      <div class="modal-body">
+        <img src="../assets/image/TRUThLogo.png" alt="logo" height="70px" width="200px">
+        <h5 style="font-weight: bold; font-style: italic; font-size: 24 px; color: #ec3d5a;">
+          Your Task
+        </h5><hr style="margin-top: -1ch;">
+        <div class="row mt-4">
+          <h4 style="font-weight: bold; font-style: italic; font-size: 22 px;">
+            {{activettask}}
+          </h4>
+        </div>
+        <div class="mt-4 d-flex justify-content-center flex-wrap">
+          <button (click)="truthdata()" class="btn btn-primary mx-2 my-1">Change Truth</button>
+          <button (click)="daredata()" class="btn btn-danger mx-2 my-1">Change Dare</button>
+          <button (click)="complete(1)" class="btn btn-success mx-2 my-1">Complete</button>
+          <button (click)="complete(0)" class="btn btn-warning mx-2 my-1">Loss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

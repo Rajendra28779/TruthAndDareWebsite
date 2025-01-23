@@ -1,0 +1,66 @@
+/* Default card style for large screens (laptop/desktop) */
+.card-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px; /* 20px padding from the screen border */
+}
+
+.card-content {
+  width: 100%; /* Card takes 100% of the available width */
+  max-height: 550px;
+  margin-left: 300px;
+  margin-right: 300px;
+  text-align: center;
+  border: 1px solid #ddd;
+  padding: 20px 20px 5px 20px;
+  background-color: #fceddf;
+  border-radius: 35px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+}
+
+@media (max-width: 1060px) {
+  .card-content {
+    margin: 10px;
+    border: 1px solid #ddd;
+    padding: 20px 20px 5px 20px;
+    max-height: 1000px;
+    box-sizing: border-box;
+    background-color: #fff;
+    border-radius: 35px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* For tablet-sized screens */
+@media (max-width: 768px) {
+  .card-content {
+    margin: 10px;
+    border: 1px solid #ddd;
+    padding: 20px 20px 5px 20px;
+    box-sizing: border-box;
+    background-color: #fff;
+    border-radius: 35px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* For mobile-sized screens */
+@media (max-width: 480px) {
+  .card-content {
+    margin: 10px;
+  border: 1px solid #ddd;
+  padding: 20px 20px 5px 20px;
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 35px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.center-image {
+  width: 300px;  /* Set your preferred width */
+  height: 70px;   /* Set your preferred height */
+  object-fit: contain; /* Ensure the image maintains its aspect ratio */
+}
