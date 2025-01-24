@@ -146,7 +146,22 @@ export class DateService {
     "Let someone write something funny on your forehead with a marker.",
     "Call a random number and sing ‘Happy Birthday’ to them.",
     "Do 10 jumping jacks while pretending to be a cheerleader.",
-    "Post a video of you singing your favorite song and tag a friend."
+    "Post a video of you singing your favorite song and tag a friend.",
+    "Do a cartwheel.",
+    "Pretend you’re on a cooking show and explain how to make a sandwich.",
+    "Dance with no music for 1 minute.",
+    "Make a funny face and hold it for 30 seconds.",
+    "Try to lick your elbow for 30 seconds.",
+    "Tell the funniest joke you know to the group.",
+    "Send a funny meme to someone in your contacts.",
+    "Act like a famous celebrity for the next 3 minutes.",
+    "Talk in rhymes for the next 5 minutes.",
+    "Let someone give you a silly hairstyle.",
+    "Walk around the room with a book on your head for 1 minute.",
+    "Pretend to be a waitress and take a random person’s 'order.'",
+    "Share the most embarrassing story from your childhood.",
+    "Try to touch your toes while balancing on one foot for 30 seconds.",
+    "Make a funny voice message for someone in your contacts."
   ];
 
   duocoupletruthlist: string[] = [
