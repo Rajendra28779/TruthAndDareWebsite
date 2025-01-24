@@ -5,8 +5,6 @@ import { Injectable } from '@angular/core';
 })
 export class DateService {
 
-  constructor() { }
-
   friendlytruthList: string[] = [
     "What’s the most embarrassing thing you’ve ever done in public?",
     "Have you ever kept a secret from your best friend?",
@@ -61,7 +59,6 @@ export class DateService {
     "What’s your biggest fear?"
   ];
 
-  // Dare questions for a group of boys and girls
   adultnormaldareList: string[] = [
     "Imitate someone in the room for the next minute.",
     "Do your best dance move for 30 seconds.",
@@ -98,7 +95,6 @@ export class DateService {
     "What’s the most mischievous thing you’ve done as a kid?"
   ];
 
-  // Dare questions for boys (deadly combo)
   boysdareList: string[] = [
     "Do 30 push-ups without stopping.",
     "Send a message to your ex saying, 'I miss you.'",
@@ -135,7 +131,6 @@ export class DateService {
     "If you could go on a date with anyone, who would it be?"
   ];
 
-  // Dare questions for girls (deadly combo)
   girlsdareList: string[] = [
     "Dance like nobody’s watching for 1 minute.",
     "Call your crush and tell them they’re amazing.",
@@ -154,12 +149,161 @@ export class DateService {
     "Post a video of you singing your favorite song and tag a friend."
   ];
 
-  duocoupletruthlist: string[] = [];
-  duocoupledarelist: string[] = [];
+  duocoupletruthlist: string[] = [
+    "What’s the first thing you noticed about me?",
+    "What’s your idea of a perfect date?",
+    "If you could describe me in three words, what would they be?",
+    "What’s a small thing someone can do to make you feel loved?",
+    "What’s your favorite memory with me so far?",
+    "What’s the most romantic thing you’ve ever done for someone?",
+    "What’s your biggest fear in a relationship?",
+    "If you had to pick one thing you love about yourself, what would it be?",
+    "What kind of compliment makes you feel most special?",
+    "What’s a quality you admire most in a partner?",
+    "What’s something you’ve always wanted to ask me but haven’t yet?",
+    "Do you believe in love at first sight, or do you think love takes time?",
+    "What’s the most thoughtful thing someone has ever done for you?",
+    "What’s a dream you haven’t shared with anyone yet?",
+    "What’s one thing about me that makes you smile?",
+    "What’s your love language? (e.g., words of affirmation, acts of service, etc.)",
+    "If you had to cook dinner for someone special, what would you make?",
+    "What song makes you think about love the most?",
+    "What’s your biggest goal in life right now?",
+    "What’s one thing you’d like to know about me that you don’t already know?"
+  ];
 
-  adultdeadtruthlist: string[] = [];
-  adultdeaddarelist: string[] = [];
+  duocoupledarelist: string[] = [
+    "Describe your ideal partner without using physical traits.",
+    "Share your favorite memory of us so far.",
+    "Ask me one question you’ve been too shy to ask before.",
+    "Tell me something about yourself that you think I’d find surprising.",
+    "Name one thing you admire about me.",
+    "Choose a random object near you and explain how it represents your personality.",
+    "Share the most interesting or unique compliment you’ve ever received.",
+    "Share one thing that makes you feel special in a relationship.",
+    "Tell me the one thing you think we have most in common.",
+    "Say something nice about me but in a completely serious tone.",
+    "If you had one wish about our connection, what would it be?",
+    "Act like you’re giving a speech at my birthday party and say something sweet.",
+    "Tell me the title of a movie you think fits our story so far.",
+    "If you wrote me a letter, what would the first line say?",
+    "Make up a nickname for me that you think I’d like.",
+    "Tell me your favorite way to spend time with me.",
+    "Share one thing about me that caught your attention when we first met.",
+    "Act like a fortune-teller and predict something fun about our future.",
+    "Tell me a fun fact about yourself that I don’t know.",
+    "Describe what an ideal weekend would look like with me."
+  ];
 
-  honeymoontruthlist: string[] = [];
-  honeymoondarelist: string[] = [];
+  adultdeadtruthlist: string[] = [
+    "Who in this group would you kiss if given a chance?",
+    "Have you ever had a crush on a friend's sibling?",
+    "What’s the most romantic thing you've ever done for someone?",
+    "Have you ever been caught in an awkward romantic situation? Share it.",
+    "What’s your biggest turn-on?",
+    "Have you ever kissed someone you didn’t like?",
+    "Who in this group do you think gives the best hugs?",
+    "What’s the most daring place you’ve kissed someone?",
+    "Have you ever lied to your partner about your feelings?",
+    "What’s the most romantic compliment you’ve ever received?",
+    "Have you ever sent a flirty text to the wrong person? What happened?",
+    "What’s the longest you've gone without showering while dating someone?",
+    "What’s the most awkward date you’ve ever been on?",
+    "Have you ever been rejected after confessing your feelings?",
+    "What’s the wildest thing you’ve done in love or lust?",
+    "Who in this group do you think is the best kisser?",
+    "Have you ever kissed someone on a dare?",
+    "Have you ever been in love with two people at the same time?",
+    "What’s your favorite part of a romantic evening?",
+    "What’s the naughtiest thought you’ve had about someone in this room?"
+  ];
+
+  adultdeaddarelist: string[] = [
+    "Give someone a 15-second hug.",
+    "Kiss someone on the cheek.",
+    "Call your crush and confess your feelings.",
+    "Dance like no one is watching for 1 minute.",
+    "Sing your favorite romantic song in a funny voice.",
+    "Let someone tickle you for 20 seconds.",
+    "Exchange a piece of clothing with someone for the next round.",
+    "Pretend to be someone in the group for 2 minutes.",
+    "Do 10 pushups while looking at someone in the group.",
+    "Post ‘I’m feeling flirty today!’ on your social media.",
+    "Let someone write something on your arm with a marker.",
+    "Send a flirty text to the 5th person in your contact list.",
+    "Let someone in the group style your hair however they like.",
+    "Imitate a romantic scene from a movie with someone in the group.",
+    "Let someone take control of your phone for 1 minute.",
+    "Give someone in the group a piggyback ride.",
+    "Share a spicy secret with someone privately.",
+    "Let someone draw something funny on your face with eyeliner.",
+    "Kiss someone’s hand as a sign of admiration.",
+    "Give someone in the group a playful slap on the shoulder.",
+    "Let someone take a funny selfie with you and post it online.",
+    "Eat a spoonful of something spicy or sour.",
+    "Pretend to propose to someone in the group.",
+    "Let someone dare you to do another dare.",
+    "Sit on someone’s lap for the next round.",
+    "Act like a cat and cuddle with someone for 1 minute.",
+    "Do your best impression of someone in the group.",
+    "Let someone whisper something funny or flirty in your ear.",
+    "Swap shoes with someone for the next round.",
+    "Let someone in the group give you a nickname and call you by it for the rest of the game."
+  ];
+
+  honeymoontruthlist: string[] = [
+    "What’s one thing about me that makes your heart race?",
+    "Describe how you felt during our first kiss.",
+    "What’s the most romantic moment we’ve shared so far?",
+    "What’s something you’d love to do with me that we haven’t done yet?",
+    "What’s one thing about me you find irresistibly attractive?",
+    "When did you first realize you were falling for me?",
+    "What’s your favorite memory from our wedding day?",
+    "What’s one secret desire you’ve never shared with anyone before?",
+    "What do you enjoy most when we cuddle together?",
+    "What’s your favorite spot to be kissed?",
+    "What’s the most special compliment I’ve ever given you?",
+    "What’s something you’ve always wanted to try in a romantic setting?",
+    "What kind of surprises make you feel the most loved?",
+    "What’s your favorite part of my personality?",
+    "What’s something you think we’ll laugh about years from now?",
+    "How do you like to be pampered the most?",
+    "What’s your idea of the ultimate romantic evening with me?",
+    "What’s the most daring romantic gesture you’d like us to try?",
+    "What’s one thing you can’t wait to do with me this year?",
+    "If you had to pick one word to describe our connection, what would it be?"
+  ];
+
+  honeymoondarelist1: string[] = [
+    "Give me a 1-minute shoulder massage.",
+    "Kiss me on the forehead and say something sweet.",
+    "Feed me a piece of fruit in the most romantic way possible.",
+    "Run your fingers through my hair for 30 seconds.",
+    "Draw a heart on my hand with your finger.",
+    "Share a secret about your feelings for me while holding my hands.",
+    "Whisper something romantic in my ear.",
+    "Rest your head on my lap for the next 5 minutes.",
+    "Trace your finger along my palm and guess what I’m thinking.",
+    "Hold my face gently and tell me what you love most about me.",
+    "Lightly tickle me and make me laugh.",
+    "Playfully blow on my neck and see my reaction.",
+    "Touch my cheek and guess what I’m thinking about.",
+    "Let me rest in your arms and sing a soft melody.",
+    "Close your eyes and let me kiss you somewhere unexpected.",
+    "Make a wish while hugging me tightly for 10 seconds.",
+    "Write a short love note and read it to me.",
+    "Gently rub my hands and tell me a sweet memory of us.",
+    "Touch your nose to mine and hold the gaze for 20 seconds.",
+    "Place a kiss on my hand and pretend you’re a prince/princess.",
+    "Dance slowly with me for 1 minute, even without music.",
+    "Brush your lips lightly on my ear and say something romantic.",
+    "Lay your head on my chest and listen to my heartbeat.",
+    "Playfully nibble on my ear or pretend to bite softly.",
+    "Hold me tightly and say what you’re most grateful for in our relationship.",
+    "Explore my favorite spot on my neck with your fingers.",
+    "Wrap me in a blanket and give me a soft kiss on the forehead.",
+    "Pretend to give me a professional shoulder massage.",
+    "Draw something romantic on my back with your finger and let me guess.",
+    "Write a romantic line on a piece of paper and hand it to me."
+  ];
 }

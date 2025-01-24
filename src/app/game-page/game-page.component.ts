@@ -19,14 +19,16 @@ export class GamePageComponent {
   darelist:any=[];
   activettask:any="";
   resultmessage:any="";
+  cat:any=1;
 
 
   constructor(private readonly dareserv:DateService) { }
 
   ngOnInit(): void {
     let cat:any = localStorage.getItem('catgory');
+    this.cat=cat;
     let gender1:any = sessionStorage.getItem('gerder');
-    let data:any=sessionStorage.getItem("name"); 
+    let data:any=sessionStorage.getItem("name");
       this.names = JSON.parse(data);
       for(let element of this.names) {
         let obj:any ={
@@ -36,7 +38,7 @@ export class GamePageComponent {
         }
         this.scorelist.push(obj);
       }
-    
+
     sessionStorage.setItem('score',JSON.stringify(this.scorelist));
 
     if(cat == 1){
@@ -61,7 +63,7 @@ export class GamePageComponent {
       this.darelist = this.dareserv.duocoupledarelist;
     }else if (cat == 6){
       this.truthlist = this.dareserv.honeymoontruthlist;
-      this.darelist = this.dareserv.honeymoondarelist;
+      this.darelist = this.dareserv.honeymoondarelist1;
     }
 
 
@@ -89,7 +91,7 @@ export class GamePageComponent {
     const audio = document.getElementById("buttonSound") as HTMLAudioElement;
 
   // Play the sound effect
-  audio.currentTime = 0; // Reset the audio to the beginning
+  audio.currentTime = 2; // Reset the audio to the beginning
   audio.play();
 
   // Show the rotating image
@@ -104,7 +106,18 @@ export class GamePageComponent {
     }, 2000);
   }
 
+  spincount:any =0;
   spin() {
+    if (this.cat == 6){
+      this.spincount = this.spincount+1;
+      if(this.spincount == 45){
+        this.darelist = this.dareserv.honeymoondarelist1;
+      }
+      if(this.spincount == 21){
+        this.darelist = this.dareserv.honeymoondarelist1;
+      }
+    }
+
     if (this.names.length > 3) {
       const randomIndex = Math.floor(Math.random() * this.names.length);
       this.activeName = this.names[randomIndex].name;
