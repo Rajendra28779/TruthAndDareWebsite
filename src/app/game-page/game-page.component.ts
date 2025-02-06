@@ -103,7 +103,7 @@ export class GamePageComponent {
       audio.pause(); // Stop the audio
       audio.currentTime = 0; // Reset the audio
       this.spin(); // Call your custom method
-    }, 2000);
+    }, 1000);
   }
 
   spincount:any =0;
@@ -111,9 +111,12 @@ export class GamePageComponent {
     if (this.cat == 6){
       this.spincount = this.spincount+1;
       if(this.spincount == 45){
-        this.darelist = this.dareserv.honeymoondarelist1;
+        this.darelist = this.dareserv.honeymoondarelist3;
       }
       if(this.spincount == 21){
+        this.darelist = this.dareserv.honeymoondarelist2;
+      }
+      if(this.spincount == 10){
         this.darelist = this.dareserv.honeymoondarelist1;
       }
     }
