@@ -110,14 +110,11 @@ export class GamePageComponent {
   spin() {
     if (this.cat == 6){
       this.spincount = this.spincount+1;
-      if(this.spincount == 45){
+      if(this.spincount == 21){
         this.darelist = this.dareserv.honeymoondarelist3;
       }
-      if(this.spincount == 21){
-        this.darelist = this.dareserv.honeymoondarelist2;
-      }
       if(this.spincount == 10){
-        this.darelist = this.dareserv.honeymoondarelist1;
+        this.darelist = this.dareserv.honeymoondarelist2;
       }
     }
 
