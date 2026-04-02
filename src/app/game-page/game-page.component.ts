@@ -20,6 +20,8 @@ export class GamePageComponent {
   activettask:any="";
   resultmessage:any="";
   cat:any=1;
+  /** Honeymoon (cat 6): 1 = light, 2 = romantic, 3 = dirty */
+  honeymoonMode: 1 | 2 | 3 = 1;
 
 
   constructor(private readonly dareserv:DateService) { }
@@ -63,7 +65,13 @@ export class GamePageComponent {
       this.darelist = this.dareserv.duocoupledarelist;
     }else if (cat == 6){
       this.truthlist = this.dareserv.honeymoontruthlist;
-      this.darelist = this.dareserv.honeymoondarelist1;
+      const savedMode = sessionStorage.getItem('honeymoonDareMode');
+      if (savedMode === '2' || savedMode === '3') {
+        this.honeymoonMode = parseInt(savedMode, 10) as 1 | 2 | 3;
+      } else {
+        this.honeymoonMode = 1;
+      }
+      this.applyHoneymoonDareList();
     }
 
 
@@ -106,15 +114,7 @@ export class GamePageComponent {
     }, 1000);
   }
 
-  spincount:any =0;
   spin() {
-    if (this.cat == 6){
-      this.spincount = this.spincount+1;
-      if(this.spincount == 8){
-        this.darelist = this.dareserv.honeymoondarelist3;
-      }
-    }
-
     if (this.names.length > 3) {
       const randomIndex = Math.floor(Math.random() * this.names.length);
       this.activeName = this.names[randomIndex].name;
@@ -176,5 +176,81 @@ export class GamePageComponent {
   closemodal(){
     $('#showresult').hide();
     $('#showcnct').hide()
+  }
+
+  get isHoneymoonCategory(): boolean {
+    return this.cat == 6 || this.cat === '6';
+  }
+
+  get honeymoonModeLabel(): string {
+    if (this.honeymoonMode === 1) {
+      return 'Light';
+    }
+    if (this.honeymoonMode === 2) {
+      return 'Romantic';
+    }
+    return 'Dirty';
+  }
+
+  applyHoneymoonDareList(): void {
+    if (!this.isHoneymoonCategory) {
+      return;
+    }
+    if (this.honeymoonMode === 1) {
+      this.darelist = [...this.dareserv.honeymoondarelist1];
+    } else if (this.honeymoonMode === 2) {
+      this.darelist = [...this.dareserv.honeymoondarelist2];
+    } else {
+      this.darelist = [...this.dareserv.honeymoondarelist3];
+    }
+  }
+
+  setHoneymoonMode(mode: 1 | 2 | 3): void {
+    this.honeymoonMode = mode;
+    sessionStorage.setItem('honeymoonDareMode', String(mode));
+    this.applyHoneymoonDareList();
+  }
+
+  /** Icon class (without `bi`) for scoreboard / cells — duo uses gender, else stable pool per name */
+  playerIconClass(player: { name?: string; gender?: string } | null | undefined): string {
+    if (!player?.name) {
+      return 'bi-person';
+    }
+    const g = String(player.gender || '').toLowerCase();
+    if (g === 'male') {
+      return 'bi-gender-male';
+    }
+    if (g === 'female') {
+      return 'bi-gender-female';
+    }
+    const pool = [
+      'bi-suit-spade-fill',
+      'bi-suit-heart-fill',
+      'bi-suit-diamond-fill',
+      'bi-suit-club-fill',
+      'bi-star-fill',
+      'bi-lightning-charge-fill',
+      'bi-moon-stars',
+      'bi-fire',
+      'bi-emoji-laughing-fill'
+    ];
+    let h = 0;
+    for (let i = 0; i < player.name.length; i++) {
+      h += player.name.charCodeAt(i);
+    }
+    return pool[h % pool.length];
+  }
+
+  get categoryVibe(): { icon: string; headline: string; sub: string } | null {
+    const key = String(this.cat ?? '');
+    const vibes: Record<string, { icon: string; headline: string; sub: string }> = {
+      '1': { icon: 'bi-balloon-heart-fill', headline: 'Friendly', sub: 'Party-safe fun' },
+      '2': { icon: 'bi-people-fill', headline: 'Single-gender night', sub: 'Boys-only or girls-only' },
+      '3': { icon: 'bi-fire', headline: 'Mixed — normal', sub: 'Turn up the heat a little' },
+      '4': { icon: 'bi-heart-pulse-fill', headline: 'Mixed — 18+', sub: 'Bold & grown-up' },
+      '5': { icon: 'bi-arrow-through-heart', headline: 'Duo', sub: 'Just the two of you' },
+      '6': { icon: 'bi-moon-stars-fill', headline: 'Honeymoon', sub: 'Pick your dare mood below' }
+    };
+    return vibes[key] ?? null;
   }
 }

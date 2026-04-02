@@ -1,76 +1,108 @@
-/* Default card style for large screens (laptop/desktop) */
 .card-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px; /* 20px padding from the screen border */
+  width: 100%;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  box-sizing: border-box;
 }
 
 .card-content {
-  width: 100%; /* Card takes 100% of the available width */
-  max-height: 550px;
-  margin-left: 300px;
-  margin-right: 300px;
+  position: relative;
+  width: 100%;
+  max-width: min(440px, calc(100vw - 24px));
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
-  border: 1px solid #ddd;
-  padding: 20px 20px 5px 20px;
-  background-color: #fceddf;
-  border-radius: 35px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: auto;
-}
-
-@media (max-width: 1060px) {
-  .card-content {
-    margin: 10px;
-    border: 1px solid #ddd;
-    padding: 20px 20px 5px 20px;
-    max-height: 1000px;
-    box-sizing: border-box;
-    background-color: #fff;
-    border-radius: 35px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-}
-
-/* For tablet-sized screens */
-@media (max-width: 768px) {
-  .card-content {
-    margin: 10px;
-    border: 1px solid #ddd;
-    padding: 20px 20px 5px 20px;
-    box-sizing: border-box;
-    background-color: #fff;
-    border-radius: 35px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-}
-
-/* For mobile-sized screens */
-@media (max-width: 480px) {
-  .card-content {
-    margin: 10px;
-  border: 1px solid #ddd;
-  padding: 20px 20px 5px 20px;
+  padding: clamp(18px, 4vw, 26px) clamp(14px, 4vw, 22px) 12px;
+  background: var(--td-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--td-glass-border);
+  border-radius: var(--td-radius-lg);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 20px 50px rgba(0, 0, 0, 0.45),
+    0 -8px 36px var(--td-glow-pink),
+    0 -2px 20px var(--td-glow-violet);
+  overflow: visible;
   box-sizing: border-box;
-  background-color: #fff;
-  border-radius: 35px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Top neon rim */
+.card-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 3px;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(90deg, transparent, #ec4899, #a78bfa, #22d3ee, transparent);
+  opacity: 0.85;
+  filter: blur(0.5px);
+  pointer-events: none;
+}
+
+.app-brand {
+  margin: 0 0 clamp(6px, 2vw, 12px);
+  padding: 0 0.25rem;
+}
+
+.app-title {
+  margin: 0;
+  font-family: var(--td-font-display);
+  font-size: clamp(1.65rem, 7vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+}
+
+.app-title__truth {
+  color: var(--td-title-truth);
+}
+
+.app-title__and {
+  color: var(--td-title-and);
+  margin: 0 0.2em;
+}
+
+.app-title__dare {
+  color: var(--td-title-dare);
+}
+
+.app-title__emoji {
+  margin-left: 0.15em;
+  font-family: var(--td-font-sans);
+  font-size: 0.85em;
+  filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.6));
+  vertical-align: middle;
+}
+
+.app-footer {
+  margin: clamp(14px, 3vw, 20px) 0 4px;
+  font-weight: 500;
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
+  color: var(--td-text-dim);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+@media (min-width: 900px) {
+  .card-content {
+    max-width: min(520px, calc(100vw - 48px));
   }
 }
 
-@media (max-width: 300px) {
+@media (max-width: 360px) {
   .card-content {
-    margin: 5px;
-    padding: 15px 10px 5px 10px;
+    padding: 14px 12px 10px;
     border-radius: 20px;
-    font-size: 12px; /* Adjust text size if needed */
-    max-height: 600px; /* Reduce max-height if applicable */
   }
 }
 
 .center-image {
-  width: 300px;  /* Set your preferred width */
-  height: 70px;   /* Set your preferred height */
-  object-fit: contain; /* Ensure the image maintains its aspect ratio */
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
 }

@@ -16,7 +16,24 @@ export class LandingpageComponent {
   showgender:any=false;
   genderval:any=0;
 
+  /** Rotating icons for name chips (party vibe) */
+  readonly nameChipIcons = [
+    'bi-star-fill',
+    'bi-lightning-charge-fill',
+    'bi-moon-stars',
+    'bi-fire',
+    'bi-heart-fill',
+    'bi-emoji-sunglasses-fill',
+    'bi-controller',
+    'bi-music-note-beamed',
+    'bi-balloon-fill'
+  ];
+
   constructor(private readonly route : Router) { }
+
+  nameChipIconAt(index: number): string {
+    return this.nameChipIcons[index % this.nameChipIcons.length];
+  }
 
   ngOnInit(): void {
     sessionStorage.clear();
