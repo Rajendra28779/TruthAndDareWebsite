@@ -1,0 +1,153 @@
+<main class="td-game" role="main">
+  <div class="td-game-card">
+    <header class="td-game-brand" aria-label="Truth and Dare">
+      <h1 class="td-game-brand__title">
+        <span class="td-game-brand__truth">Truth</span>
+        <span class="td-game-brand__and">And</span>
+        <span class="td-game-brand__dare">Dare</span>
+        <span class="td-game-brand__emoji" aria-hidden="true">💋</span>
+      </h1>
+    </header>
+
+    <p class="td-game-tagline">
+      <span class="td-game-tagline__spark" aria-hidden="true">✨</span>
+      Let's play and enjoy.
+    </p>
+
+    <div class="game-honeymoon-combo" *ngIf="isHoneymoonCategory && categoryVibe as hv" role="group" aria-label="Honeymoon dare intensity">
+      <div class="game-honeymoon-combo__head">
+        <i class="bi game-honeymoon-combo__icon" [ngClass]="hv.icon" aria-hidden="true"></i>
+        <div class="game-honeymoon-combo__titles">
+          <span class="game-honeymoon-combo__hl">{{ hv.headline }}</span>
+          <span class="game-honeymoon-combo__sub">{{ hv.sub }}</span>
+        </div>
+      </div>
+      <div class="game-honeymoon-combo__mood">
+        <span class="game-honeymoon-combo__mood-label">Dare mood</span>
+        <div class="game-honeymoon-combo__btns">
+          <button type="button" class="game-honeymoon-modes__btn" [class.game-honeymoon-modes__btn--active]="honeymoonMode === 1" (click)="setHoneymoonMode(1)">
+            <i class="bi bi-brightness-high-fill" aria-hidden="true"></i> Light
+          </button>
+          <button type="button" class="game-honeymoon-modes__btn" [class.game-honeymoon-modes__btn--active]="honeymoonMode === 2" (click)="setHoneymoonMode(2)">
+            <i class="bi bi-heart-fill" aria-hidden="true"></i> Romantic
+          </button>
+          <button type="button" class="game-honeymoon-modes__btn" [class.game-honeymoon-modes__btn--active]="honeymoonMode === 3" (click)="setHoneymoonMode(3)">
+            <i class="bi bi-fire" aria-hidden="true"></i> Dirty
+          </button>
+        </div>
+      </div>
+      <p class="game-honeymoon-combo__hint">Switch anytime — next dare uses your pick.</p>
+    </div>
+
+    <div class="game-vibe game-vibe--compact" *ngIf="!isHoneymoonCategory && categoryVibe as vibe">
+      <i class="bi game-vibe__icon" [ngClass]="vibe.icon" aria-hidden="true"></i>
+      <div class="game-vibe__text">
+        <span class="game-vibe__headline">{{ vibe.headline }}</span>
+        <span class="game-vibe__sub">{{ vibe.sub }}</span>
+      </div>
+    </div>
+
+    <div class="game-panel">
+      <div class="game-board" *ngIf="names.length > 3">
+        <div *ngFor="let row of getRows(); let rowIndex = index" class="game-board__row">
+          <div
+            *ngFor="let name of row"
+            class="game-cell"
+            [class.game-cell--active]="name?.name === activeName">
+            <i class="bi game-cell__icon" [ngClass]="playerIconClass(name)" aria-hidden="true"></i>
+            <span class="game-cell__name">{{ name?.name || 'Empty' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <ng-container *ngIf="names.length <= 3">
+        <div *ngFor="let name of names" class="game-cell game-cell--wide"
+          [class.game-cell--active]="name?.name === activeName">
+          <i class="bi game-cell__icon" [ngClass]="playerIconClass(name)" aria-hidden="true"></i>
+          <span class="game-cell__name">{{ name?.name || 'Empty' }}</span>
+        </div>
+      </ng-container>
+
+      <div class="game-spin-row" [class.game-spin-row--solo]="names.length > 3 || showbtn">
+        <button type="button" (click)="handleButtonClick()" class="game-spin">
+          <i class="bi bi-arrow-repeat" aria-hidden="true"></i> Spin
+        </button>
+        <button type="button" (click)="showresult()" class="game-result-btn" *ngIf="names.length <= 3">
+          <i class="bi bi-trophy" aria-hidden="true"></i> Result
+        </button>
+      </div>
+
+      <div id="overlay" class="game-overlay" style="display: none;">
+        <img src="assets/image/bottol-image.png" alt="" class="game-bottle" id="rotateimage">
+      </div>
+      <audio id="buttonSound" src="assets/image/bottol_audio.mp3"></audio>
+
+      <div class="game-actions game-actions--stack" *ngIf="showbtn">
+        <button type="button" (click)="truthdata()" class="btn btn-primary game-btn">
+          <i class="bi bi-chat-quote-fill" aria-hidden="true"></i> Truth
+        </button>
+        <button type="button" (click)="daredata()" class="btn btn-danger game-btn">
+          <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i> Dare
+        </button>
+      </div>
+    </div>
+
+    <p class="td-game-footer">Copyright © {{ copyYear }} · All rights reserved</p>
+  </div>
+</main>
+
+<div class="modal game-modal" id="showcnct" tabindex="-1" aria-labelledby="taskModalTitle" aria-hidden="true">
+  <div class="modal-dialog game-modal__dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <h2 id="taskModalTitle" class="game-modal__heading"><i class="bi bi-chat-square-text-fill game-modal__title-icon" aria-hidden="true"></i> Your task</h2>
+        <hr class="game-modal__rule">
+        <p class="game-modal__task">{{ activettask }}</p>
+        <div class="game-modal__btns">
+          <button type="button" (click)="truthdata()" class="btn btn-primary game-btn game-btn--popup"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Change truth</button>
+          <button type="button" (click)="daredata()" class="btn btn-danger game-btn game-btn--popup"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Change dare</button>
+          <button type="button" (click)="complete(1)" class="btn btn-success game-btn game-btn--popup"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Complete</button>
+          <button type="button" (click)="complete(0)" class="btn btn-warning game-btn game-btn--popup"><i class="bi bi-emoji-frown-fill" aria-hidden="true"></i> Loss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal game-modal" id="showresult" tabindex="-1" aria-labelledby="resultModalTitle" aria-hidden="true">
+  <div class="modal-dialog game-modal__dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <h2 id="resultModalTitle" class="game-modal__heading"><i class="bi bi-trophy-fill game-modal__title-icon" aria-hidden="true"></i> Result</h2>
+        <div class="table-responsive game-table-wrap">
+          <table class="table table-striped">
+            <caption class="visually-hidden">Scores by player</caption>
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th *ngIf="isHoneymoonCategory" scope="col" class="game-result-th-mood">Dare mood</th>
+                <th scope="col">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of scorelist">
+                <td>
+                  <span class="game-score-name">
+                    <i class="bi game-score-name__icon" [ngClass]="playerIconClass(item)" aria-hidden="true"></i>
+                    {{ item.name }}
+                  </span>
+                </td>
+                <td *ngIf="isHoneymoonCategory" class="game-result-mood">{{ honeymoonModeLabel }}</td>
+                <td class="game-result-score">{{ item.score }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="game-modal__footer-text">Play more, enjoy more!</p>
+        <div class="game-modal__close-wrap">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closemodal()"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

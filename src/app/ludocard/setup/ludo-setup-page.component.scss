@@ -1,0 +1,294 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+}
+
+.ludo-setup {
+  position: relative;
+  width: 100%;
+  max-width: min(28rem, 100%);
+  margin: 0 auto;
+  padding: 0.35rem 0.5rem 1rem;
+  box-sizing: border-box;
+}
+
+.ludo-setup__modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(5, 2, 12, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-sizing: border-box;
+}
+
+.ludo-setup__modal-panel {
+  width: 100%;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 1.15rem 1.1rem 1.05rem;
+  border-radius: var(--td-radius-md);
+  background: var(--td-glass-strong);
+  border: 1px solid rgba(244, 114, 182, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 20px 48px rgba(0, 0, 0, 0.55),
+    0 0 36px rgba(236, 72, 153, 0.18);
+  text-align: center;
+}
+
+.ludo-setup__modal-title {
+  margin: 0 0 0.65rem;
+  font-family: var(--td-font-display);
+  font-size: clamp(1.1rem, 4vw, 1.28rem);
+  font-weight: 700;
+  font-style: italic;
+  color: #fce7f3;
+  line-height: 1.25;
+}
+
+.ludo-setup__modal-body {
+  margin: 0;
+  text-align: left;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--td-text-muted);
+
+  p {
+    margin: 0 0 0.55rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  strong {
+    color: var(--td-text);
+    font-weight: 600;
+  }
+}
+
+.ludo-setup__modal-hint {
+  font-size: 0.74rem;
+  font-style: italic;
+  color: var(--td-text-dim);
+}
+
+.ludo-setup__modal-ok {
+  margin-top: 1rem;
+  min-height: 44px;
+  min-width: 6.5rem;
+  padding: 0.5rem 1.5rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0c0714;
+  background: linear-gradient(135deg, #f9a8d4, #f472b6);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 0 22px rgba(244, 114, 182, 0.35);
+  transition: filter 0.15s ease, transform 0.1s ease;
+
+  &:hover {
+    filter: brightness(1.06);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fbcfe8;
+    outline-offset: 3px;
+  }
+}
+
+.ludo-setup__back {
+  position: relative;
+  z-index: 10060;
+  display: inline-flex;
+  margin: 0 0 0.5rem 0.1rem;
+  font-size: clamp(0.68rem, min(2vw, 2.2vh), 0.8rem);
+  font-weight: 600;
+  color: var(--td-title-and);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--td-title-and);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+.ludo-setup__content {
+  position: relative;
+  z-index: 1;
+}
+
+.ludo-setup__panel {
+  padding: clamp(1rem, 3vw, 1.35rem);
+  border-radius: var(--td-radius-lg);
+  background: linear-gradient(
+    168deg,
+    rgba(36, 28, 58, 0.94) 0%,
+    rgba(22, 18, 40, 0.97) 45%,
+    rgba(14, 11, 28, 0.98) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 0 0 1px rgba(236, 72, 153, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+}
+
+.ludo-setup__title {
+  margin: 0 0 0.35rem;
+  text-align: center;
+  font-family: var(--td-font-display);
+  font-size: clamp(1.35rem, 5vw, 1.75rem);
+  font-weight: 700;
+  color: var(--td-text);
+}
+
+.ludo-setup__lead {
+  margin: 0 0 1rem;
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--td-text-muted);
+}
+
+.ludo-setup__duo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ludo-setup__field-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.ludo-setup__badge {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-top: 1.65rem;
+  border-radius: 10px;
+  font-size: 1.05rem;
+
+  &--she {
+    color: #fbcfe8;
+    background: rgba(236, 72, 153, 0.2);
+    border: 1px solid rgba(244, 114, 182, 0.35);
+  }
+
+  &--he {
+    color: #c4b5fd;
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(167, 139, 250, 0.35);
+  }
+}
+
+.ludo-setup__field {
+  flex: 1;
+  min-width: 0;
+}
+
+.ludo-setup__label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--td-text);
+}
+
+.ludo-setup__label-icon {
+  color: var(--td-title-and);
+}
+
+.ludo-setup__input {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--td-text);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: var(--td-text-dim);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba(167, 139, 250, 0.55);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+  }
+}
+
+.ludo-setup__message {
+  margin: 0.75rem 0 0;
+  font-size: 0.78rem;
+  color: #fb7185;
+  text-align: center;
+}
+
+.ludo-setup__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.15rem;
+}
+
+.ludo-setup__btn {
+  min-height: 44px;
+  padding: 0.5rem 1.35rem;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+
+  &--primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #0c0714;
+    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+    box-shadow: 0 0 22px rgba(139, 92, 246, 0.35);
+
+    &:hover {
+      filter: brightness(1.06);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--td-title-and);
+      outline-offset: 2px;
+    }
+  }
+}

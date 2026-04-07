@@ -1,0 +1,73 @@
+<main class="ludo-setup" role="main">
+  <div
+    *ngIf="showCoupleDisclaimer"
+    class="ludo-setup__modal"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="ludoSetupDisclaimerTitle"
+    aria-describedby="ludoSetupDisclaimerDesc"
+  >
+    <div class="ludo-setup__modal-panel">
+      <h2 id="ludoSetupDisclaimerTitle" class="ludo-setup__modal-title">Couples only</h2>
+      <div id="ludoSetupDisclaimerDesc" class="ludo-setup__modal-body">
+        <p>
+          <strong>Desire Dice</strong> is only for <strong>couples</strong>. It is meant for private play between partners and may include <strong>romantic</strong> and <strong>adult intimate</strong> prompts — always with mutual consent.
+        </p>
+        <p class="ludo-setup__modal-hint">If that does not apply to you, please leave this game.</p>
+      </div>
+      <button type="button" class="ludo-setup__modal-ok" (click)="dismissDisclaimer()">OK</button>
+    </div>
+  </div>
+
+  <a routerLink="/landing" class="ludo-setup__back">← All games</a>
+
+  <div class="ludo-setup__content" *ngIf="showNameStep">
+    <div class="ludo-setup__panel">
+      <h1 class="ludo-setup__title">Desire Dice</h1>
+      <p class="ludo-setup__lead">Enter both names — then continue to the board.</p>
+
+      <div class="ludo-setup__duo">
+        <div class="ludo-setup__field-row">
+          <span class="ludo-setup__badge ludo-setup__badge--she" aria-hidden="true"><i class="bi bi-gender-female"></i></span>
+          <div class="ludo-setup__field">
+            <label class="ludo-setup__label" for="ludoHerName"><i class="bi bi-person-hearts ludo-setup__label-icon" aria-hidden="true"></i> Her name</label>
+            <input
+              id="ludoHerName"
+              type="text"
+              class="ludo-setup__input"
+              [(ngModel)]="herName"
+              name="ludoHerName"
+              placeholder="Enter name"
+              autocomplete="given-name"
+              maxlength="24"
+            />
+          </div>
+        </div>
+        <div class="ludo-setup__field-row">
+          <span class="ludo-setup__badge ludo-setup__badge--he" aria-hidden="true"><i class="bi bi-gender-male"></i></span>
+          <div class="ludo-setup__field">
+            <label class="ludo-setup__label" for="ludoHisName"><i class="bi bi-person-heart ludo-setup__label-icon" aria-hidden="true"></i> His name</label>
+            <input
+              id="ludoHisName"
+              type="text"
+              class="ludo-setup__input"
+              [(ngModel)]="hisName"
+              name="ludoHisName"
+              placeholder="Enter name"
+              autocomplete="given-name"
+              maxlength="24"
+            />
+          </div>
+        </div>
+      </div>
+
+      <p *ngIf="message" class="ludo-setup__message" role="alert">{{ message }}</p>
+
+      <div class="ludo-setup__actions">
+        <button type="button" class="ludo-setup__btn ludo-setup__btn--primary" (click)="startGame()">
+          Continue <i class="bi bi-play-fill" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</main>

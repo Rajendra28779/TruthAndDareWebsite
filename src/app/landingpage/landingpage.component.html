@@ -1,135 +1,83 @@
-<main class="landing" role="main">
-  <header class="landing__hero">
-    <p class="landing__tagline">
-      Life is more fun when you take risks — embrace the truth, dare to dream, and let the game begin!
-    </p>
-  </header>
+<main class="hub" role="main">
+  <div class="hub-panel">
+    <div class="hub-panel__inner">
+      <header class="hub__hero">
+        <p class="hub__eyebrow">Games for real life</p>
+        <h1 class="hub__title">Play together</h1>
+        <p class="hub__lead">
+          Light-hearted fun with friends, flirty energy for couples, and romantic or spicier modes when the lights go low — you choose the vibe.
+        </p>
+        <ul class="hub__audience" aria-label="Who these games are for">
+          <li class="hub__audience-item">
+            <i class="bi bi-emoji-laughing-fill hub__audience-icon" aria-hidden="true"></i>
+            <span>Friends &amp; parties</span>
+          </li>
+          <li class="hub__audience-item">
+            <i class="bi bi-heart-fill hub__audience-icon" aria-hidden="true"></i>
+            <span>Love &amp; romance</span>
+          </li>
+          <li class="hub__audience-item">
+            <i class="bi bi-moon-stars-fill hub__audience-icon" aria-hidden="true"></i>
+            <span>After dark &amp; couples</span>
+          </li>
+        </ul>
+        <p class="hub__note">
+          Some titles include optional adult-oriented content — pick modes that fit your group and moment.
+        </p>
+      </header>
 
-  <section *ngIf="show1st" class="landing__section" aria-labelledby="landing-categories-title">
-    <p id="landing-categories-title" class="landing__kicker">Choose your game mode</p>
-    <div class="mode-grid">
-      <button type="button" class="mode-card mode-card--1" (click)="catgory(1)">
-        <span class="mode-card__accent" aria-hidden="true"></span>
-        <span class="mode-card__icon" aria-hidden="true"><i class="bi bi-balloon-heart-fill mode-card__glyph"></i></span>
-        <span class="mode-card__body">
-          <span class="mode-card__title">Friendly</span>
-          <span class="mode-card__sub">Light &amp; fun for everyone</span>
-        </span>
-        <span class="mode-card__chevron" aria-hidden="true"></span>
-      </button>
+      <div class="hub__divider" aria-hidden="true"></div>
 
-      <button type="button" class="mode-card mode-card--2" (click)="catgory(2)">
-        <span class="mode-card__accent" aria-hidden="true"></span>
-        <span class="mode-card__icon" aria-hidden="true"><i class="bi bi-people-fill mode-card__glyph"></i></span>
-        <span class="mode-card__body">
-          <span class="mode-card__title">Adult — single gender</span>
-          <span class="mode-card__sub">Only boys or only girls</span>
-        </span>
-        <span class="mode-card__chevron" aria-hidden="true"></span>
-      </button>
-
-      <button type="button" class="mode-card mode-card--3" (click)="catgory(3)">
-        <span class="mode-card__accent" aria-hidden="true"></span>
-        <span class="mode-card__icon" aria-hidden="true"><i class="bi bi-fire mode-card__glyph"></i></span>
-        <span class="mode-card__body">
-          <span class="mode-card__title">Adult — mixed — normal</span>
-          <span class="mode-card__sub">Boys &amp; girls, standard spice</span>
-        </span>
-        <span class="mode-card__chevron" aria-hidden="true"></span>
-      </button>
-
-      <button type="button" class="mode-card mode-card--4" (click)="catgory(4)">
-        <span class="mode-card__accent" aria-hidden="true"></span>
-        <span class="mode-card__icon" aria-hidden="true"><i class="bi bi-heart-pulse-fill mode-card__glyph"></i></span>
-        <span class="mode-card__body">
-          <span class="mode-card__title">Adult — mixed — 18+</span>
-          <span class="mode-card__sub">Mature prompts</span>
-        </span>
-        <span class="mode-card__chevron" aria-hidden="true"></span>
-      </button>
-
-      <button type="button" class="mode-card mode-card--5" (click)="catgory(5)">
-        <span class="mode-card__accent" aria-hidden="true"></span>
-        <span class="mode-card__icon" aria-hidden="true"><i class="bi bi-arrow-through-heart mode-card__glyph"></i></span>
-        <span class="mode-card__body">
-          <span class="mode-card__title">Duo</span>
-          <span class="mode-card__sub">One boy &amp; one girl</span>
-        </span>
-        <span class="mode-card__chevron" aria-hidden="true"></span>
-      </button>
-
-      <button type="button" class="mode-card mode-card--6" (click)="catgory(6)">
-        <span class="mode-card__accent" aria-hidden="true"></span>
-        <span class="mode-card__icon" aria-hidden="true"><i class="bi bi-moon-stars-fill mode-card__glyph"></i></span>
-        <span class="mode-card__body">
-          <span class="mode-card__title">Dirty couple</span>
-          <span class="mode-card__sub">Honeymoon edition</span>
-        </span>
-        <span class="mode-card__chevron" aria-hidden="true"></span>
-      </button>
-    </div>
-  </section>
-
-  <section *ngIf="!show1st" class="landing__section landing__setup" aria-labelledby="landing-setup-title">
-    <h2 id="landing-setup-title" class="landing__section-title">Set up players</h2>
-
-    <div class="landing__gender" *ngIf="cat == 2" role="radiogroup" aria-label="Choose player group">
-      <span class="landing__label"><i class="bi bi-people-fill landing__label-icon" aria-hidden="true"></i> Who is playing?</span>
-      <div class="landing__radio-row">
-        <label class="landing__radio">
-          <input type="radio" name="gender" value="1" (change)="gend(1)">
-          <i class="bi bi-gender-male landing__radio-icon" aria-hidden="true"></i>
-          <span>Only boys</span>
-        </label>
-        <label class="landing__radio">
-          <input type="radio" name="gender" value="2" (change)="gend(2)">
-          <i class="bi bi-gender-female landing__radio-icon" aria-hidden="true"></i>
-          <span>Only girls</span>
-        </label>
-      </div>
-    </div>
-
-    <div class="input-container" *ngIf="!showgender">
-      <label class="landing__field-label" for="name"><i class="bi bi-person-plus-fill landing__label-icon" aria-hidden="true"></i> Player name</label>
-      <div class="landing__input-row">
-        <input type="text" class="name" id="name" name="name" placeholder="Enter name" autocomplete="off" maxlength="10" (keyup.enter)="addname()">
-        <button type="button" class="add-button" (click)="addname()"><i class="bi bi-plus-lg" aria-hidden="true"></i> Add</button>
-      </div>
-    </div>
-
-    <div class="name-list" *ngIf="!showgender" role="list" aria-label="Added players">
-      <ng-container *ngFor="let item of nameList; let idx = index">
-        <div class="chip" role="listitem">
-          <i class="bi chip__icon" [ngClass]="nameChipIconAt(idx)" aria-hidden="true"></i>
-          <span class="chip__text">{{ item }}</span>
-          <button type="button" class="chip__remove" [attr.aria-label]="'Remove ' + item" (click)="removename(item)"></button>
+      <section class="hub__section" aria-labelledby="hub-games-heading">
+        <div class="hub__section-head">
+          <p class="hub__section-kicker">Pick &amp; play</p>
+          <h2 id="hub-games-heading" class="hub__section-title">Games in this app</h2>
+          <p class="hub__section-sub">Tap a card to start. More games will appear here as we release them.</p>
         </div>
-      </ng-container>
-    </div>
 
-    <div class="landing__duo" *ngIf="showgender">
-      <div class="input-container input-container--duo">
-        <span class="landing__role-badge landing__role-badge--he" aria-hidden="true"><i class="bi bi-gender-male"></i></span>
-        <div class="landing__field">
-          <label class="landing__field-label" for="malename"><i class="bi bi-person-heart landing__label-icon" aria-hidden="true"></i> His name</label>
-          <input type="text" class="name name--full" id="malename" name="malename" placeholder="Enter name" autocomplete="off" maxlength="10">
+        <div class="hub__grid" role="list">
+          <article
+            *ngFor="let game of games"
+            class="game-card"
+            [class.game-card--disabled]="!game.available"
+            [class.game-card--violet]="game.accent === 'violet'"
+            [class.game-card--rose]="game.accent === 'rose'"
+            [class.game-card--cyan]="game.accent === 'cyan'"
+            [class.game-card--amber]="game.accent === 'amber'"
+            role="listitem"
+          >
+            <div class="game-card__accent" aria-hidden="true"></div>
+            <div class="game-card__top">
+              <span class="game-card__icon-wrap" aria-hidden="true">
+                <i class="bi game-card__icon" [ngClass]="game.icon"></i>
+              </span>
+              <div class="game-card__titles">
+                <h3 class="game-card__name">{{ game.title }}</h3>
+                <p class="game-card__tagline">{{ game.tagline }}</p>
+              </div>
+            </div>
+            <p class="game-card__desc">{{ game.description }}</p>
+            <ul class="game-card__tags" aria-label="Highlights">
+              <li *ngFor="let tag of game.tags" class="game-card__tag">{{ tag }}</li>
+            </ul>
+            <div class="game-card__footer">
+              <button
+                *ngIf="game.available"
+                type="button"
+                class="game-card__cta"
+                (click)="openGame(game)"
+              >
+                <span>Play</span>
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </button>
+              <span *ngIf="!game.available" class="game-card__soon">
+                <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+                Coming soon
+              </span>
+            </div>
+          </article>
         </div>
-      </div>
-      <div class="input-container input-container--duo">
-        <span class="landing__role-badge landing__role-badge--she" aria-hidden="true"><i class="bi bi-gender-female"></i></span>
-        <div class="landing__field">
-          <label class="landing__field-label" for="femalename"><i class="bi bi-person-hearts landing__label-icon" aria-hidden="true"></i> Her name</label>
-          <input type="text" class="name name--full" id="femalename" name="femalename" placeholder="Enter name" autocomplete="off" maxlength="10">
-        </div>
-      </div>
+      </section>
     </div>
-
-    <p *ngIf="message != null" class="landing__message" role="alert">{{ message }}</p>
-
-    <div class="landing__actions">
-      <button type="button" class="btn-landing btn-landing--back" (click)="privious()"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back</button>
-      <button type="button" class="btn-landing btn-landing--start" *ngIf="nameList.length > 1 && !showgender" (click)="next()">Let's start <i class="bi bi-play-fill" aria-hidden="true"></i></button>
-      <button type="button" class="btn-landing btn-landing--start" *ngIf="showgender" (click)="next1()">Let's start <i class="bi bi-play-fill" aria-hidden="true"></i></button>
-    </div>
-  </section>
+  </div>
 </main>

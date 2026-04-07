@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Inner fill sits inside parent .ludo-track__frame dashed border (reference layout) */
+.ludo-tcard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  border-radius: clamp(2px, 0.4vmin, 5px);
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  box-sizing: border-box;
+}
+
+.ludo-tcard__media {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2px, 0.5vmin, 5px);
+  box-sizing: border-box;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+}
+
+.ludo-tcard--hero {
+  .ludo-tcard__media {
+    padding: clamp(6px, 1.8vmin, 14px);
+  }
+}

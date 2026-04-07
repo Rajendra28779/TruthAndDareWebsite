@@ -1,20 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { LandingpageComponent } from './landingpage.component';
+import { MenuPageComponent } from './menu-page.component';
 
-describe('LandingpageComponent', () => {
-  let component: LandingpageComponent;
-  let fixture: ComponentFixture<LandingpageComponent>;
+describe('MenuPageComponent', () => {
+  let component: MenuPageComponent;
+  let fixture: ComponentFixture<MenuPageComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule],
-      declarations: [LandingpageComponent]
+      declarations: [MenuPageComponent]
     });
-    fixture = TestBed.createComponent(LandingpageComponent);
+    fixture = TestBed.createComponent(MenuPageComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {

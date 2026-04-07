@@ -1,152 +1,62 @@
 import { Component } from "@angular/core";
 import { Router } from "@angular/router";
 
-declare let $:any;
+export type LandingGameAccent = "violet" | "rose" | "cyan" | "amber";
+
+export interface LandingGame {
+  id: string;
+  title: string;
+  tagline: string;
+  description: string;
+  /** When null, game is not playable yet */
+  route: string[] | null;
+  icon: string;
+  accent: LandingGameAccent;
+  tags: string[];
+  available: boolean;
+}
 
 @Component({
   selector: 'app-landingpage',
   templateUrl: './landingpage.component.html',
-  styleUrls: ['./landingpage.component.scss']
+  styleUrls: ['./landingpage.component.scss'],
+  host: { class: 'hub-route' },
 })
 export class LandingpageComponent {
-  nameList:any=[];
-  message:any;
-  show1st:any=true;
-  cat:any;
-  showgender:any=false;
-  genderval:any=0;
-
-  /** Rotating icons for name chips (party vibe) */
-  readonly nameChipIcons = [
-    'bi-star-fill',
-    'bi-lightning-charge-fill',
-    'bi-moon-stars',
-    'bi-fire',
-    'bi-heart-fill',
-    'bi-emoji-sunglasses-fill',
-    'bi-controller',
-    'bi-music-note-beamed',
-    'bi-balloon-fill'
+  /** Add entries here as you ship new games */
+  readonly games: LandingGame[] = [
+    {
+      id: "truth-dare",
+      title: "Truth & Dare",
+      tagline: "Spin the bottle — laugh, confess, dare",
+      description:
+        "Modes for friend groups and parties, duo & couple flows, and optional grown-up decks when you want the night to stay between you.",
+      route: ["/truthanddare/menu"],
+      icon: "bi-chat-heart-fill",
+      accent: "violet",
+      tags: ["Friends & masti", "Couples & romance", "Private / bedtime"],
+      available: true
+    },
+    {
+      id: "ludo-card",
+      title: "Desire Dice",
+      tagline: "For couples — private, romantic play",
+      description:
+        "Couples-only experience with romantic and adult intimate prompts between consenting partners. You’ll confirm before the game opens.",
+      route: ["/ludocard"],
+      icon: "bi-heart-fill",
+      accent: "rose",
+      tags: ["Couples", "Romance", "18+ private"],
+      available: true
+    }
   ];
 
-  constructor(private readonly route : Router) { }
+  constructor(private readonly route: Router) { }
 
-  nameChipIconAt(index: number): string {
-    return this.nameChipIcons[index % this.nameChipIcons.length];
-  }
-
-  ngOnInit(): void {
-    sessionStorage.clear();
-    this.cat = localStorage.getItem('catgory');
-  }
-
-
-  addname(){
-    if(this.nameList.length > 8){
-      this.message = "Maximum 9 people Allowed !"
-      $('#name').val('');
-      return ;
-    }
-
-    let name= $('#name').val();
-    let stat=true;
-    for(let element of this.nameList){
-      if(element == name){
-        stat=false;
-        $('#name').val('');
-      }
-    }
-    if(stat){
-      this.nameList.push(name);
-      $('#name').val('');
-    }
-  }
-
-  removename(item:any){
-    for(let element of this.nameList){
-      if(element == item){
-        let index = this.nameList.indexOf(element);
-          if (index !== -1) {
-            this.nameList.splice(index, 1);
-          }
-      }
-    }
-  }
-
-  catgory(no:any){
-    this.cat=no;
-    localStorage.setItem('catgory',no);
-    this.show1st=false;
-    if(no == 5 || no == 6){
-      this.showgender=true;
-    }else{
-      this.showgender=false;
-    }
-  }
-
-  privious(){
-    localStorage.removeItem('catgory');
-    this.show1st=true;
-    this.nameList=[];
-  }
-
-  next(){
-    if(this.cat==2 && (this.genderval == 0 || this.genderval == undefined)){
-      this.message = "Please Specify Gender."
+  openGame(game: LandingGame): void {
+    if (!game.available || !game.route?.length) {
       return;
     }
-    sessionStorage.removeItem('name');
-    sessionStorage.removeItem('gerder');
-    let nameobjlist:any=[];
-
-    for (let element of this.nameList){
-      let obj:any ={
-        name:element,
-        gender:''
-      }
-      nameobjlist.push(obj);
-    }
-    sessionStorage.setItem('name',JSON.stringify(nameobjlist));
-    sessionStorage.setItem('gerder',this.genderval);
-    this.route.navigate(['/gamepage'])
-  }
-
-  next1(){
-    sessionStorage.removeItem('name');
-
-    let boyname = $('#malename').val();
-    let girlname = $('#femalename').val();
-
-    if(boyname == null || boyname == undefined || boyname == ""){
-      $('#malename').focus();
-      this.message = "Please enter Name ."
-      return;
-    }
-    if(girlname == null || girlname == undefined || girlname == ""){
-      $('#femalename').focus();
-      this.message = "Please enter Name ."
-      return;
-    }
-
-    let obj:any ={
-      name:boyname,
-      gender:'male'
-    }
-
-    let obj1:any ={
-      name:girlname,
-      gender:'female'
-    }
-
-    let duolist:any=[];
-    duolist.push(obj);
-    duolist.push(obj1);
-
-    sessionStorage.setItem('name',JSON.stringify(duolist));
-    this.route.navigate(['/gamepage'])
-  }
-
-  gend(no:any){
-    this.genderval=no;
+    this.route.navigate(game.route);
   }
 }

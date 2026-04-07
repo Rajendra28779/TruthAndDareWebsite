@@ -1,0 +1,5 @@
+<article class="ludo-tcard" [class.ludo-tcard--hero]="variant === 'hero'" [attr.aria-label]="card.value">
+  <div class="ludo-tcard__media" *ngIf="card.img">
+    <img [src]="card.img" alt="" loading="lazy" />
+  </div>
+</article>

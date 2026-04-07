@@ -1,103 +1,98 @@
-.card-container {
+.app-shell {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
   width: 100%;
-  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
   box-sizing: border-box;
 }
 
-.card-content {
-  position: relative;
+/* No page-level scrollbar; tall routes scroll inside this pane with bar hidden */
+.app-shell > router-outlet + *:not(.hub-route):not(.ludo-route):not(.ludo-setup-route) {
+  flex: 1 1 auto;
+  min-height: 0;
   width: 100%;
-  max-width: min(440px, calc(100vw - 24px));
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-  padding: clamp(18px, 4vw, 26px) clamp(14px, 4vw, 22px) 12px;
-  background: var(--td-glass);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--td-glass-border);
-  border-radius: var(--td-radius-lg);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 20px 50px rgba(0, 0, 0, 0.45),
-    0 -8px 36px var(--td-glow-pink),
-    0 -2px 20px var(--td-glow-violet);
-  overflow: visible;
-  box-sizing: border-box;
-}
+  max-width: 100%;
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 
-/* Top neon rim */
-.card-content::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 8%;
-  right: 8%;
-  height: 3px;
-  border-radius: 0 0 8px 8px;
-  background: linear-gradient(90deg, transparent, #ec4899, #a78bfa, #22d3ee, transparent);
-  opacity: 0.85;
-  filter: blur(0.5px);
-  pointer-events: none;
-}
-
-.app-brand {
-  margin: 0 0 clamp(6px, 2vw, 12px);
-  padding: 0 0.25rem;
-}
-
-.app-title {
-  margin: 0;
-  font-family: var(--td-font-display);
-  font-size: clamp(1.65rem, 7vw, 2.15rem);
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: 0.02em;
-}
-
-.app-title__truth {
-  color: var(--td-title-truth);
-}
-
-.app-title__and {
-  color: var(--td-title-and);
-  margin: 0 0.2em;
-}
-
-.app-title__dare {
-  color: var(--td-title-dare);
-}
-
-.app-title__emoji {
-  margin-left: 0.15em;
-  font-family: var(--td-font-sans);
-  font-size: 0.85em;
-  filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.6));
-  vertical-align: middle;
-}
-
-.app-footer {
-  margin: clamp(14px, 3vw, 20px) 0 4px;
-  font-weight: 500;
-  font-size: clamp(0.7rem, 2vw, 0.8rem);
-  color: var(--td-text-dim);
-  text-align: center;
-  letter-spacing: 0.02em;
-}
-
-@media (min-width: 900px) {
-  .card-content {
-    max-width: min(520px, calc(100vw - 48px));
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
   }
 }
 
-@media (max-width: 360px) {
-  .card-content {
-    padding: 14px 12px 10px;
-    border-radius: 20px;
+/* Ludo play: fixed viewport, no host scroll */
+.app-shell > router-outlet + .ludo-route {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ludo setup: disclaimer + name form (may scroll if needed) */
+.app-shell > router-outlet + .ludo-setup-route {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+}
+
+/* Landing: flex + scroll + visible themed scrollbar (duplicated in styles.scss for WebKit reliability) */
+.app-shell > router-outlet + .hub-route {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.55) rgba(255, 255, 255, 0.06);
+  -ms-overflow-style: auto;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    display: block;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(167, 139, 250, 0.55), rgba(236, 72, 153, 0.4));
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(192, 181, 250, 0.75), rgba(244, 114, 182, 0.55));
+    background-clip: padding-box;
   }
 }
 
