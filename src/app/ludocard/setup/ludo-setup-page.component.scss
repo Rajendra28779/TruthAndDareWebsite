@@ -75,6 +75,15 @@
   }
 }
 
+.ludo-setup__modal-tip {
+  margin-top: 0.65rem !important;
+  padding-top: 0.55rem;
+  border-top: 1px solid rgba(244, 114, 182, 0.22);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--td-text-muted);
+}
+
 .ludo-setup__modal-hint {
   font-size: 0.74rem;
   font-style: italic;
