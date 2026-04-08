@@ -39,6 +39,41 @@
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  gap: 12px;
+}
+
+.ludo-game__top-title-group {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2.5vw, 16px);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.ludo-game__rules-link {
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid rgba(124, 92, 201, 0.55);
+  border-radius: 8px;
+  background: rgba(45, 31, 92, 0.45);
+  color: #c4b5e8;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(91, 63, 160, 0.5);
+    border-color: rgba(167, 139, 250, 0.65);
+    color: #e9d5ff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #7c5fc9;
+    outline-offset: 2px;
+  }
 }
 
 .ludo-game__back {
@@ -61,6 +96,566 @@
 .ludo-game__title {
   font-size: 13px;
   color: #9c8fbe;
+}
+
+/* Landed tile — task / preview (above rules) */
+.ludo-game__card-action-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  background: rgba(8, 6, 18, 0.88);
+  backdrop-filter: blur(5px);
+  opacity: 0;
+  transition: opacity 0.32s ease;
+
+  &--enter {
+    opacity: 1;
+  }
+}
+
+.ludo-game__card-action-dialog {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  max-width: min(22rem, 100%);
+  max-height: min(85vh, 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(167, 139, 250, 0.5);
+  background: linear-gradient(165deg, #231d3d 0%, #15112a 100%);
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, 0.58),
+    0 0 0 1px rgba(167, 139, 250, 0.12) inset;
+  overflow: hidden;
+  box-sizing: border-box;
+  transform-style: preserve-3d;
+  transform: perspective(960px) rotateY(-90deg) scale(0.78) translateY(32px);
+  opacity: 0;
+  filter: brightness(0.88);
+  transition:
+    transform 0.58s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.42s ease,
+    filter 0.5s ease,
+    box-shadow 0.5s ease;
+
+  &--enter {
+    transform: perspective(960px) rotateY(0deg) scale(1) translateY(0);
+    opacity: 1;
+    filter: brightness(1);
+    box-shadow:
+      0 32px 80px rgba(0, 0, 0, 0.45),
+      0 0 60px rgba(139, 92, 246, 0.18),
+      0 0 0 1px rgba(167, 139, 250, 0.15) inset;
+  }
+}
+
+.ludo-game__card-action-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(46, 37, 70, 0.95);
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.32s ease 0.06s,
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.06s;
+}
+
+.ludo-game__card-action-dialog--enter .ludo-game__card-action-head {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ludo-game__card-action-title {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.8vw, 1.2rem);
+  font-weight: 800;
+  color: #fdf4ff;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+}
+
+.ludo-game__card-action-sl {
+  margin: 0;
+  padding: 8px 16px 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(196, 181, 253, 0.75);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.28s ease 0.1s,
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
+}
+
+.ludo-game__card-action-dialog--enter .ludo-game__card-action-sl {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ludo-game__card-action-preview {
+  padding: 14px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  perspective: 900px;
+}
+
+.ludo-game__card-action-cardface {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  transform-style: preserve-3d;
+  opacity: 0;
+  transform: translateZ(-28px) rotateX(12deg) scale(0.92);
+  transition: none;
+}
+
+.ludo-game__card-action-dialog--enter .ludo-game__card-action-cardface {
+  animation: ludo-card-face-forward 0.62s cubic-bezier(0.25, 1, 0.45, 1) 0.08s both;
+}
+
+@keyframes ludo-card-face-forward {
+  0% {
+    opacity: 0;
+    transform: translateZ(-48px) rotateX(18deg) rotateY(-12deg) scale(0.88);
+  }
+  55% {
+    opacity: 1;
+    transform: translateZ(8px) rotateX(-2deg) rotateY(4deg) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateZ(0) rotateX(0) rotateY(0) scale(1);
+  }
+}
+
+/* Single bordered “playing card” — full art + Sl. No. overlay */
+.ludo-game__card-action-cardframe {
+  position: relative;
+  flex-shrink: 1;
+  width: min(210px, 78vw);
+  max-height: min(52vh, calc(100dvh - 220px));
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  border: 2px solid rgba(186, 147, 255, 0.75);
+  background: linear-gradient(165deg, #3d2f6b 0%, #1e1538 100%);
+  overflow: hidden;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+
+.ludo-game__card-action-cardframe .ludo-game__card-action-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ludo-game__card-action-cardnum {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(2.75rem, 16vmin, 4rem);
+  font-weight: 900;
+  color: #fefcff;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.55),
+    0 0 28px rgba(139, 92, 246, 0.35);
+  pointer-events: none;
+}
+
+.ludo-game__card-action-caption {
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: rgba(245, 240, 255, 0.96);
+}
+
+/* Dare: text only — no card frame */
+.ludo-game__card-action-dare {
+  width: 100%;
+  padding: 8px 4px 4px;
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.ludo-game__card-action-dialog--enter .ludo-game__card-action-dare {
+  animation: ludo-dare-reveal 0.52s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+@keyframes ludo-dare-reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ludo-game__card-action-dare-text {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1rem, 3.2vw, 1.15rem);
+  font-weight: 600;
+  line-height: 1.55;
+  color: rgba(250, 245, 255, 0.98);
+}
+
+.ludo-game__card-action-btns {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid rgba(46, 37, 70, 0.95);
+  flex-shrink: 0;
+  box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.35s ease 0.18s,
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.18s;
+}
+
+.ludo-game__card-action-dialog--enter .ludo-game__card-action-btns {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ludo-game__card-action-btn {
+  flex: 1 1 50%;
+  padding: 11px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: filter 0.15s, transform 0.1s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #a78bfa;
+    outline-offset: 2px;
+  }
+
+  &--no {
+    background: rgba(30, 27, 50, 0.95);
+    border-color: rgba(244, 114, 182, 0.45);
+    color: #fbcfe8;
+  }
+
+  &--no:hover {
+    filter: brightness(1.12);
+  }
+
+  &--ok {
+    background: linear-gradient(180deg, #7c3aed 0%, #5b21b6 100%);
+    border-color: rgba(167, 139, 250, 0.55);
+    color: #faf5ff;
+  }
+
+  &--ok:hover {
+    filter: brightness(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ludo-game__card-action-overlay,
+  .ludo-game__card-action-dialog,
+  .ludo-game__card-action-head,
+  .ludo-game__card-action-sl,
+  .ludo-game__card-action-btns {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+
+  .ludo-game__card-action-dialog--enter .ludo-game__card-action-cardface {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  .ludo-game__card-action-dialog--enter .ludo-game__card-action-dare {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  .ludo-game__card-action-dialog--enter {
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+/* Phones / small tablets: same width as desktop modal (narrow column), tall height; card fits with min padding */
+@media (max-width: 900px), (max-height: 720px) {
+  .ludo-game__card-action-overlay {
+    align-items: center;
+    justify-content: center;
+    padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+
+  .ludo-game__card-action-dialog {
+    flex: 0 1 auto;
+    width: 100%;
+    /* Width unchanged from desktop — centered “web view” column */
+    max-width: min(22rem, calc(100vw - 24px));
+    min-height: 0;
+    /* Use vertical space; still a floating panel, not full-bleed width */
+    max-height: min(92dvh, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px));
+  }
+
+  .ludo-game__card-action-head {
+    padding: 10px 12px 8px;
+  }
+
+  .ludo-game__card-action-title {
+    font-size: clamp(0.92rem, 4.2vw, 1.1rem);
+  }
+
+  .ludo-game__card-action-preview {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 6px 8px 8px;
+    overflow: hidden;
+    -webkit-overflow-scrolling: auto;
+  }
+
+  .ludo-game__card-action-cardface {
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+  }
+
+  /* Card scales down to fit modal body; min outer padding via preview + max-height */
+  .ludo-game__card-action-cardframe {
+    width: min(210px, 100%);
+    max-width: min(210px, calc(100vw - 40px));
+    max-height: min(50dvh, calc(92dvh - 200px));
+    aspect-ratio: 3 / 4;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  .ludo-game__card-action-cardnum {
+    font-size: clamp(1.75rem, 12vmin, 3rem);
+  }
+
+  .ludo-game__card-action-caption {
+    font-size: clamp(0.8rem, 3.4vw, 0.92rem);
+    line-height: 1.35;
+    padding: 0 2px;
+  }
+
+  .ludo-game__card-action-dare {
+    padding: 2px 4px 4px;
+  }
+
+  .ludo-game__card-action-dare-text {
+    font-size: clamp(0.85rem, 3.6vw, 1rem);
+    line-height: 1.4;
+  }
+
+  .ludo-game__card-action-btns {
+    gap: 8px;
+    padding: 8px 10px 12px;
+  }
+
+  .ludo-game__card-action-btn {
+    padding: 9px 10px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 480px), (max-height: 600px) {
+  .ludo-game__card-action-cardframe {
+    max-height: min(44dvh, calc(92dvh - 190px));
+  }
+
+  .ludo-game__card-action-caption {
+    font-size: clamp(0.75rem, 3.2vw, 0.88rem);
+  }
+
+  .ludo-game__card-action-dare-text {
+    font-size: clamp(0.8rem, 3.4vw, 0.95rem);
+  }
+}
+
+/* Game rules modal */
+.ludo-game__rules-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  background: rgba(8, 6, 18, 0.88);
+  backdrop-filter: blur(6px);
+}
+
+.ludo-game__rules-dialog {
+  display: flex;
+  flex-direction: column;
+  max-width: min(36rem, 100%);
+  max-height: min(88vh, 100%);
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  background: linear-gradient(165deg, #1f1a32 0%, #15112a 100%);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.ludo-game__rules-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(46, 37, 70, 0.95);
+}
+
+.ludo-game__rules-main-title {
+  margin: 0;
+  font-size: clamp(1rem, 2.8vw, 1.2rem);
+  font-weight: 800;
+  color: #e9d5ff;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  padding-right: 8px;
+}
+
+.ludo-game__rules-close {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin: -6px -8px 0 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #a78bfa;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(124, 58, 237, 0.2);
+    color: #e9d5ff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #7c5fc9;
+    outline-offset: 2px;
+  }
+}
+
+.ludo-game__rules-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 18px 20px;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgba(226, 213, 255, 0.92);
+  -webkit-overflow-scrolling: touch;
+
+  p {
+    margin: 0 0 0.75rem;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.ludo-game__rules-lead {
+  font-size: 0.92rem;
+  color: #ddd6fe;
+}
+
+.ludo-game__rules-warn {
+  padding: 10px 12px;
+  margin: 1rem 0 !important;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  background: rgba(120, 53, 15, 0.2);
+  color: #fde68a;
+}
+
+.ludo-game__rules-h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #c4b5fd;
+
+  &:first-of-type {
+    margin-top: 0.5rem;
+  }
+}
+
+.ludo-game__rules-h4 {
+  margin: 1rem 0 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #a78bfa;
+}
+
+.ludo-game__rules-list {
+  margin: 0 0 0.85rem;
+  padding-left: 1.25rem;
+
+  li {
+    margin-bottom: 0.35rem;
+  }
+
+  &--compact li {
+    margin-bottom: 0.25rem;
+  }
+}
+
+.ludo-game__rules-footer-note {
+  margin-top: 1rem !important;
+  font-weight: 600;
+  color: #f0abfc;
 }
 
 .ludo-game__board {
@@ -89,6 +684,10 @@
 
   &--his {
     border-left: 1px solid #2e2546;
+  }
+
+  &--inactive {
+    opacity: 0.48;
   }
 }
 
@@ -165,6 +764,8 @@
   align-items: center;
   padding-bottom: clamp(2px, 0.8vw, 6px);
   box-sizing: border-box;
+  position: relative;
+  z-index: 0;
 }
 
 .ludo-game__dice-readout {
@@ -185,6 +786,14 @@
   &--rolling {
     animation: ludo-readout-jitter 0.16s ease-in-out infinite;
   }
+
+  &--flash {
+    animation: ludo-readout-flash 0.85s ease-out 1;
+  }
+}
+
+.ludo-game__dice-readout--his.ludo-game__dice-readout--flash {
+  animation-name: ludo-readout-flash-his;
 }
 
 @keyframes ludo-readout-jitter {
@@ -205,6 +814,38 @@
   }
 }
 
+@keyframes ludo-readout-flash {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 0 12px rgba(192, 132, 252, 0.55);
+  }
+  35% {
+    transform: scale(1.18);
+    color: #fdf4ff;
+    text-shadow: 0 0 22px rgba(244, 114, 182, 0.95), 0 0 36px rgba(216, 180, 254, 0.8);
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 0 0 12px rgba(192, 132, 252, 0.55);
+  }
+}
+
+@keyframes ludo-readout-flash-his {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 0 12px rgba(96, 165, 250, 0.5);
+  }
+  35% {
+    transform: scale(1.18);
+    color: #f0f9ff;
+    text-shadow: 0 0 22px rgba(56, 189, 248, 0.95), 0 0 36px rgba(125, 211, 252, 0.75);
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 0 0 12px rgba(96, 165, 250, 0.5);
+  }
+}
+
 .ludo-game__side-actions {
   display: flex;
   flex-direction: column;
@@ -212,9 +853,13 @@
   gap: clamp(4px, 1vw, 6px);
   flex-shrink: 0;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .ludo-game__dice-wrap {
+  min-width: 44px;
+  min-height: 44px;
   width: clamp(44px, 11vw, 56px);
   height: clamp(44px, 11vw, 56px);
   cursor: pointer;
@@ -247,11 +892,8 @@
   transition: transform 0.3s;
   transform: rotateX(15deg) rotateY(-15deg);
   display: block;
-
-  &--spin {
-    transition: transform 0.15s;
-    transform: rotateX(30deg) rotateY(30deg) scale(1.15);
-  }
+  /* Let taps hit the <button>, not the SVG (fixes missing clicks on some mobile browsers). */
+  pointer-events: none;
 
   &--roll {
     transition: none;
@@ -269,9 +911,31 @@
 }
 
 .ludo-game__dice-lbl {
+  margin: 0;
+  padding: 6px 10px;
+  min-height: 32px;
+  border: none;
+  background: none;
+  font: inherit;
   font-size: clamp(7px, 1.6vw, 9px);
   color: #9c8fbe;
   letter-spacing: 0.5px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: #c4b5e8;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #7c5fc9;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 /* Rectangular Play — replaces circular control */
@@ -361,6 +1025,111 @@
   margin-bottom: 8px;
 }
 
+/* Wrap each board cell for pawn highlight + name badges */
+.ludo-game__track-slot {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  border-radius: 12px;
+  transition: box-shadow 0.28s ease;
+
+  .ludo-game__go-card,
+  .ludo-game__players-card,
+  .ludo-game__cell {
+    width: 100%;
+  }
+
+  &--her:not(.ludo-game__track-slot--his) {
+    box-shadow:
+      0 0 0 2px rgba(244, 114, 182, 0.95),
+      0 0 16px rgba(236, 72, 153, 0.45);
+  }
+
+  &--his:not(.ludo-game__track-slot--her) {
+    box-shadow:
+      0 0 0 2px rgba(125, 211, 252, 0.95),
+      0 0 16px rgba(56, 189, 248, 0.45);
+  }
+
+  &--her.ludo-game__track-slot--his {
+    box-shadow:
+      0 0 0 2px rgba(244, 114, 182, 0.95),
+      0 0 0 4px rgba(125, 211, 252, 0.92),
+      0 0 18px rgba(236, 72, 153, 0.35),
+      0 0 22px rgba(56, 189, 248, 0.3);
+  }
+
+  /* CARD/DARE: flip-in on the tile before the action modal opens */
+  &--board-flip {
+    perspective: 960px;
+
+    > .ludo-game__players-card,
+    > .ludo-game__cell:not(.ludo-game__cell--mystery),
+    > button.ludo-game__cell {
+      animation: ludo-board-card-flip 0.5s cubic-bezier(0.34, 1.15, 0.64, 1) both;
+      transform-origin: center center;
+      will-change: transform;
+    }
+  }
+}
+
+@keyframes ludo-board-card-flip {
+  0% {
+    transform: rotateY(-86deg) scale(0.94);
+    opacity: 0.72;
+    filter: brightness(0.88);
+  }
+
+  72% {
+    transform: rotateY(6deg) scale(1.02);
+    opacity: 1;
+  }
+
+  100% {
+    transform: rotateY(0) scale(1);
+    opacity: 1;
+    filter: none;
+  }
+}
+
+.ludo-game__pawn-badges {
+  position: absolute;
+  top: 5px;
+  right: 4px;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  pointer-events: none;
+  max-width: calc(100% - 8px);
+}
+
+.ludo-game__pawn-badge {
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: clamp(8px, 2.1vmin, 10px);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  &--her {
+    background: linear-gradient(145deg, #f472b6, #d946ef);
+    color: #fffbeb;
+  }
+
+  &--his {
+    background: linear-gradient(145deg, #7dd3fc, #38bdf8);
+    color: #0c4a6e;
+  }
+}
+
 .ludo-game__cell {
   border-radius: 10px;
   position: relative;
@@ -424,6 +1193,16 @@
 
   &:active {
     transform: scale(0.98);
+  }
+
+  &--locked {
+    cursor: default;
+    pointer-events: none;
+
+    &:hover {
+      transform: none;
+      filter: none;
+    }
   }
 }
 

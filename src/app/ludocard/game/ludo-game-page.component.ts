@@ -2,11 +2,13 @@ import { isPlatformBrowser } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  ElementRef,
   HostListener,
   Inject,
   OnDestroy,
   OnInit,
   PLATFORM_ID,
+  ViewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { LudocardCoupleService } from '../ludocard-couple.service';
@@ -24,8 +26,17 @@ export type TrackSlot =
   | { kind: 'players'; card: LudocardDeckItem }
   | { kind: 'deck'; card: LudocardDeckItem };
 
+/** Dice / ROLL button — tumbling die + blinking readout */
+const DICE_ROLL_MS = 1500;
+/** Play button — same animation, can use a different length */
 const PLAY_ROLL_MS = 2000;
-const PLAY_ROLL_TICK_MS = 85;
+const ROLL_TICK_MS = 85;
+/** Delay between board steps when moving pawn (6 → 7 → 8). */
+const TRACK_STEP_MS = 115;
+/** After landing on a bonus tile: show it opened, then wait before moving forward. */
+const BONUS_REVEAL_PAUSE_MS = 520;
+/** CARD/DARE: board tile flip, then open the action modal (matches flip duration). */
+const BOARD_FLIP_THEN_MODAL_MS = 500;
 
 @Component({
   selector: 'app-ludo-game',
@@ -34,10 +45,10 @@ const PLAY_ROLL_TICK_MS = 85;
   host: { class: 'ludo-route' },
 })
 export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('boardInner', { read: ElementRef }) boardInner?: ElementRef<HTMLElement>;
+
   diceHer = 1;
   diceHim = 1;
-  diceHerSpin = false;
-  diceHimSpin = false;
 
   /** Big digit above dice — matches `diceHer` / `diceHim` after each roll. */
   herReadout = 1;
@@ -46,10 +57,39 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
   herRolling = false;
   himRolling = false;
 
+  /** Whose turn it is to roll — HER starts; switches after each completed roll. */
+  activeTurn: 'her' | 'him' = 'her';
+
+  /** Board positions (linear index: 0 = GO, then PLAYERS, then deck cells). */
+  herTrackIndex = 0;
+  himTrackIndex = 0;
+
+  /** Brief highlight on dice readout after a roll lands. */
+  herReadoutFlash = false;
+  himReadoutFlash = false;
+
+  /** True while pawn is stepping or resolving bonus after a roll (dice disabled). */
+  herMoveBusy = false;
+  himMoveBusy = false;
+
   private herRollTick: ReturnType<typeof setInterval> | null = null;
   private herRollEnd: ReturnType<typeof setTimeout> | null = null;
   private himRollTick: ReturnType<typeof setInterval> | null = null;
   private himRollEnd: ReturnType<typeof setTimeout> | null = null;
+
+  private readonly pendingMoveTimeouts: ReturnType<typeof setTimeout>[] = [];
+
+  private queueTrackedTimeout(fn: () => void, ms: number): void {
+    let id!: ReturnType<typeof setTimeout>;
+    id = setTimeout(() => {
+      const ix = this.pendingMoveTimeouts.indexOf(id);
+      if (ix >= 0) {
+        this.pendingMoveTimeouts.splice(ix, 1);
+      }
+      fn();
+    }, ms);
+    this.pendingMoveTimeouts.push(id);
+  }
 
   toastMessage = '';
   toastVisible = false;
@@ -57,6 +97,21 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** True while viewport is portrait — prompt user to rotate (esp. phones). */
   portraitHint = false;
+
+  rulesModalOpen = false;
+
+  /** Shown after a tile is revealed by landing; turn passes only after Complete / Not complete. */
+  cardActionModalOpen = false;
+  cardActionModalCard: LudocardDeckItem | null = null;
+  /** Track index of the tile shown in the action modal (for label, e.g. PLAYERS at 1). */
+  cardActionModalTrackIndex: number | null = null;
+  /** Drives flip / forward CSS animation after the modal mounts. */
+  cardActionModalEnter = false;
+  /** Track index whose tile plays the pre-modal flip (CARD/DARE only). */
+  boardFlipTrackIndex: number | null = null;
+  /** Whose turn landed on this tile — header shows their name. */
+  cardActionModalWho: 'her' | 'him' | null = null;
+  private pendingTurnAfterCardModal: 'her' | 'him' | null = null;
 
   private readonly onOrientOrResize = (): void => this.updatePortraitHint();
 
@@ -144,9 +199,23 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.clearHerPlayRoll();
     this.clearHimPlayRoll();
+    this.pendingMoveTimeouts.forEach((id) => clearTimeout(id));
+    this.pendingMoveTimeouts.length = 0;
+    this.boardFlipTrackIndex = null;
   }
 
   /** Many browsers only lock after a user gesture — retry once after first tap. */
+  @HostListener('document:keydown.escape')
+  onDocumentEscape(): void {
+    if (this.cardActionModalOpen) {
+      this.dismissCardActionModal();
+      return;
+    }
+    if (this.rulesModalOpen) {
+      this.closeRulesModal();
+    }
+  }
+
   @HostListener('document:click')
   onDocumentClickForLandscapeLock(): void {
     if (!isPlatformBrowser(this.platformId) || this.lockTriedAfterGesture) {
@@ -168,7 +237,7 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     const so = screen.orientation as ScreenOrientation & {
-      lock?: (orientation: OrientationLockType) => Promise<void>;
+      lock?: (orientation: string) => Promise<void>;
     };
     if (typeof so?.lock === 'function') {
       void so.lock('landscape').catch(() => {});
@@ -219,6 +288,56 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get hisName(): string {
     return this.couple.maleName;
+  }
+
+  get isHerTurn(): boolean {
+    return this.activeTurn === 'her';
+  }
+
+  get isHisTurn(): boolean {
+    return this.activeTurn === 'him';
+  }
+
+  /** Total cells on the track (GO + deck path). */
+  get trackSlotCount(): number {
+    if (this.deck.cards.length === 0) {
+      return 1;
+    }
+    return 1 + this.deck.cards.length;
+  }
+
+  get herPawnLabel(): string {
+    return this.shortPlayerLabel(this.herName);
+  }
+
+  get hisPawnLabel(): string {
+    return this.shortPlayerLabel(this.hisName);
+  }
+
+  private shortPlayerLabel(name: string): string {
+    const t = name.trim();
+    if (!t.length) {
+      return '…';
+    }
+    return t.length > 9 ? `${t.slice(0, 8)}…` : t;
+  }
+
+  /** Linear index for a grid cell (handles last row with fewer than 7 columns). */
+  cellIndex(rowIndex: number, colIndex: number): number {
+    const rows = this.trackRows;
+    let idx = 0;
+    for (let r = 0; r < rowIndex; r++) {
+      idx += rows[r].length;
+    }
+    return idx + colIndex;
+  }
+
+  isHerAt(rowIndex: number, colIndex: number): boolean {
+    return this.herTrackIndex === this.cellIndex(rowIndex, colIndex);
+  }
+
+  isHimAt(rowIndex: number, colIndex: number): boolean {
+    return this.himTrackIndex === this.cellIndex(rowIndex, colIndex);
   }
 
   get trackRows(): TrackSlot[][] {
@@ -275,35 +394,36 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     return card.id;
   }
 
-  revealDeckCell(card: LudocardDeckItem): void {
-    if (card.openStatus !== 0) {
-      return;
+  /** Card at linear track index: 0 = GO (none), 1 = first card, … */
+  getCardAtTrackIndex(trackIndex: number): LudocardDeckItem | null {
+    if (trackIndex <= 0) {
+      return null;
     }
-    card.openStatus = 1;
+    const i = trackIndex - 1;
+    if (i >= 0 && i < this.deck.cards.length) {
+      return this.deck.cards[i];
+    }
+    return null;
   }
 
   rollHer(): void {
-    this.diceHer = Math.floor(Math.random() * 6) + 1;
-    this.herReadout = this.diceHer;
-    this.diceHerSpin = true;
-    setTimeout(() => {
-      this.diceHerSpin = false;
-    }, 150);
-    this.showToast(`♀ Her rolled ${this.diceHer}!`);
+    this.runHerAnimatedRoll(DICE_ROLL_MS);
   }
 
   rollHim(): void {
-    this.diceHim = Math.floor(Math.random() * 6) + 1;
-    this.himReadout = this.diceHim;
-    this.diceHimSpin = true;
-    setTimeout(() => {
-      this.diceHimSpin = false;
-    }, 150);
-    this.showToast(`♂ His rolled ${this.diceHim}!`);
+    this.runHimAnimatedRoll(DICE_ROLL_MS);
   }
 
   playHer(): void {
-    if (this.herRolling) {
+    this.runHerAnimatedRoll(PLAY_ROLL_MS);
+  }
+
+  playHim(): void {
+    this.runHimAnimatedRoll(PLAY_ROLL_MS);
+  }
+
+  private runHerAnimatedRoll(durationMs: number): void {
+    if (this.activeTurn !== 'her' || this.herRolling) {
       return;
     }
     this.clearHerPlayRollTimersOnly();
@@ -311,18 +431,24 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.herRolling = true;
     this.herRollTick = setInterval(() => {
       this.herReadout = Math.floor(Math.random() * 6) + 1;
-    }, PLAY_ROLL_TICK_MS);
+    }, ROLL_TICK_MS);
     this.herRollEnd = setTimeout(() => {
       this.clearHerPlayRollTimersOnly();
       this.diceHer = final;
       this.herReadout = final;
       this.herRolling = false;
+      this.herReadoutFlash = true;
+      setTimeout(() => {
+        this.herReadoutFlash = false;
+      }, 900);
       this.showToast(`♀ Her rolled ${final}!`);
-    }, PLAY_ROLL_MS);
+      this.herMoveBusy = true;
+      this.beginHerMoveAfterDice(final);
+    }, durationMs);
   }
 
-  playHim(): void {
-    if (this.himRolling) {
+  private runHimAnimatedRoll(durationMs: number): void {
+    if (this.activeTurn !== 'him' || this.himRolling) {
       return;
     }
     this.clearHimPlayRollTimersOnly();
@@ -330,14 +456,248 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.himRolling = true;
     this.himRollTick = setInterval(() => {
       this.himReadout = Math.floor(Math.random() * 6) + 1;
-    }, PLAY_ROLL_TICK_MS);
+    }, ROLL_TICK_MS);
     this.himRollEnd = setTimeout(() => {
       this.clearHimPlayRollTimersOnly();
       this.diceHim = final;
       this.himReadout = final;
       this.himRolling = false;
+      this.himReadoutFlash = true;
+      setTimeout(() => {
+        this.himReadoutFlash = false;
+      }, 900);
       this.showToast(`♂ His rolled ${final}!`);
-    }, PLAY_ROLL_MS);
+      this.himMoveBusy = true;
+      this.beginHimMoveAfterDice(final);
+    }, durationMs);
+  }
+
+  private beginHerMoveAfterDice(steps: number): void {
+    const maxIdx = Math.max(0, this.trackSlotCount - 1);
+    const from = this.herTrackIndex;
+    const to = Math.min(from + steps, maxIdx);
+    this.animateTrackIndex('her', from, to, () => {
+      this.finishLandingAfterMove('her', to);
+    });
+  }
+
+  private beginHimMoveAfterDice(steps: number): void {
+    const maxIdx = Math.max(0, this.trackSlotCount - 1);
+    const from = this.himTrackIndex;
+    const to = Math.min(from + steps, maxIdx);
+    this.animateTrackIndex('him', from, to, () => {
+      this.finishLandingAfterMove('him', to);
+    });
+  }
+
+  /**
+   * Steps pawn one cell at a time; intermediate cells stay unrevealed.
+   * Opens tiles when resolving a landing; bonus tiles open first, then the pawn moves by the bonus amount.
+   */
+  private animateTrackIndex(
+    who: 'her' | 'him',
+    from: number,
+    to: number,
+    done: () => void,
+  ): void {
+    if (from === to) {
+      this.scrollTrackCellIntoView(to);
+      done();
+      return;
+    }
+    const dir = to > from ? 1 : -1;
+    let cur = from;
+    const step = (): void => {
+      cur += dir;
+      if (who === 'her') {
+        this.herTrackIndex = cur;
+      } else {
+        this.himTrackIndex = cur;
+      }
+      this.scrollTrackCellIntoView(cur);
+      if (cur === to) {
+        done();
+        return;
+      }
+      this.queueTrackedTimeout(step, TRACK_STEP_MS);
+    };
+    this.queueTrackedTimeout(step, TRACK_STEP_MS);
+  }
+
+  private finishLandingAfterMove(who: 'her' | 'him', idx: number): void {
+    const maxIdx = Math.max(0, this.trackSlotCount - 1);
+    const card = this.getCardAtTrackIndex(idx);
+
+    if (!card) {
+      this.endTurnAfterResolution(who);
+      return;
+    }
+
+    if (card.type === LUDOCARD_TYPE_BONUS) {
+      const n = card.bonus;
+      if (n != null && n >= 1) {
+        const next = Math.min(idx + n, maxIdx);
+        if (next > idx) {
+          if (card.openStatus === 0) {
+            card.openStatus = 1;
+          }
+          this.scrollTrackCellIntoView(idx);
+          this.queueTrackedTimeout(() => {
+            this.animateTrackIndex(who, idx, next, () => {
+              this.finishLandingAfterMove(who, next);
+            });
+          }, BONUS_REVEAL_PAUSE_MS);
+          return;
+        }
+      }
+      if (card.openStatus === 0) {
+        card.openStatus = 1;
+      }
+      this.scrollTrackCellIntoView(idx);
+      this.offerCardActionModalIfApplicable(card, who, idx);
+      return;
+    }
+
+    if (card.openStatus === 0) {
+      card.openStatus = 1;
+    }
+    this.scrollTrackCellIntoView(idx);
+    this.offerCardActionModalIfApplicable(card, who, idx);
+  }
+
+  /**
+   * Bonus & skip (blocker): board only, no modal.
+   * CARD: full card in modal. DARE: `value` text only. Others: end turn.
+   */
+  private offerCardActionModalIfApplicable(
+    card: LudocardDeckItem,
+    who: 'her' | 'him',
+    trackIndex: number,
+  ): void {
+    if (card.type === LUDOCARD_TYPE_SKIP || card.type === LUDOCARD_TYPE_BONUS) {
+      this.endTurnAfterResolution(who);
+      return;
+    }
+    if (card.type === LUDOCARD_TYPE_CARD || card.type === LUDOCARD_TYPE_DARE) {
+      this.scheduleBoardFlipThenModal(card, who, trackIndex);
+      return;
+    }
+    this.endTurnAfterResolution(who);
+  }
+
+  private prefersReducedMotion(): boolean {
+    if (!isPlatformBrowser(this.platformId)) {
+      return false;
+    }
+    try {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Board tile flip ~0.5s, then existing modal open animation. */
+  private scheduleBoardFlipThenModal(
+    card: LudocardDeckItem,
+    who: 'her' | 'him',
+    trackIndex: number,
+  ): void {
+    if (this.prefersReducedMotion()) {
+      this.openCardActionModal(card, who, trackIndex);
+      return;
+    }
+    this.boardFlipTrackIndex = trackIndex;
+    this.queueTrackedTimeout(() => {
+      this.boardFlipTrackIndex = null;
+      this.openCardActionModal(card, who, trackIndex);
+    }, BOARD_FLIP_THEN_MODAL_MS);
+  }
+
+  private scrollTrackCellIntoView(trackIndex: number): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    const run = (): void => {
+      const root = this.boardInner?.nativeElement;
+      if (!root) {
+        return;
+      }
+      const el = root.querySelector(`[data-track-index="${trackIndex}"]`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    };
+    requestAnimationFrame(() => {
+      setTimeout(run, 0);
+    });
+  }
+
+  private openCardActionModal(card: LudocardDeckItem, who: 'her' | 'him', trackIndex: number): void {
+    this.cardActionModalEnter = false;
+    this.cardActionModalCard = card;
+    this.cardActionModalTrackIndex = trackIndex;
+    this.cardActionModalWho = who;
+    this.pendingTurnAfterCardModal = who;
+    this.cardActionModalOpen = true;
+    this.scrollTrackCellIntoView(trackIndex);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        this.cardActionModalEnter = true;
+      }, 40);
+    });
+  }
+
+  dismissCardActionModal(): void {
+    this.closeCardActionModalAndPassTurn();
+  }
+
+  /** Wire your game rules (penalties, etc.) here later. */
+  onCardActionComplete(): void {
+    this.closeCardActionModalAndPassTurn();
+  }
+
+  /** Wire your game rules (penalties, etc.) here later. */
+  onCardActionNotComplete(): void {
+    this.closeCardActionModalAndPassTurn();
+  }
+
+  private closeCardActionModalAndPassTurn(): void {
+    const who = this.pendingTurnAfterCardModal;
+    this.cardActionModalEnter = false;
+    this.cardActionModalOpen = false;
+    this.cardActionModalCard = null;
+    this.cardActionModalTrackIndex = null;
+    this.cardActionModalWho = null;
+    this.pendingTurnAfterCardModal = null;
+    if (who) {
+      this.endTurnAfterResolution(who);
+    }
+  }
+
+  get cardActionModalPlayerName(): string {
+    if (this.cardActionModalWho === 'her') {
+      return this.herName;
+    }
+    if (this.cardActionModalWho === 'him') {
+      return this.hisName;
+    }
+    return '';
+  }
+
+  isModalCardType(card: LudocardDeckItem): boolean {
+    return card.type === LUDOCARD_TYPE_CARD;
+  }
+
+  isModalDareType(card: LudocardDeckItem): boolean {
+    return card.type === LUDOCARD_TYPE_DARE;
+  }
+
+  private endTurnAfterResolution(who: 'her' | 'him'): void {
+    this.herMoveBusy = false;
+    this.himMoveBusy = false;
+    if (who === 'her') {
+      this.activeTurn = 'him';
+    } else {
+      this.activeTurn = 'her';
+    }
   }
 
   private clearHerPlayRollTimersOnly(): void {
@@ -378,6 +738,14 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onGiftClick(): void {
     this.showToast('🎁 Mystery reward!');
+  }
+
+  openRulesModal(): void {
+    this.rulesModalOpen = true;
+  }
+
+  closeRulesModal(): void {
+    this.rulesModalOpen = false;
   }
 
   showToast(msg: string): void {

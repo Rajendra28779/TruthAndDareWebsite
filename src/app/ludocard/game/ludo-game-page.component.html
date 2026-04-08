@@ -2,12 +2,21 @@
   <div class="ludo-game__page">
     <header class="ludo-game__top">
       <a routerLink="/landing" class="ludo-game__back">← All games</a>
-      <span class="ludo-game__title">Couples board</span>
+      <div class="ludo-game__top-title-group">
+        <button type="button" class="ludo-game__rules-link" (click)="openRulesModal()">
+          Game rules
+        </button>
+        <span class="ludo-game__title">Couples board</span>
+      </div>
     </header>
 
     <div class="ludo-game__board">
       <!-- HER -->
-      <aside class="ludo-game__side ludo-game__side--her" aria-label="Her side">
+      <aside
+        class="ludo-game__side ludo-game__side--her"
+        [class.ludo-game__side--inactive]="!isHerTurn"
+        aria-label="Her side"
+      >
         <div class="ludo-game__side-inner">
           <div class="ludo-game__side-head">
             <div class="ludo-game__avatar" aria-hidden="true">♀</div>
@@ -20,6 +29,7 @@
             <div
               class="ludo-game__dice-readout"
               [class.ludo-game__dice-readout--rolling]="herRolling"
+              [class.ludo-game__dice-readout--flash]="herReadoutFlash"
               aria-live="polite"
             >
               {{ herReadout }}
@@ -30,13 +40,12 @@
               type="button"
               class="ludo-game__dice-wrap"
               (click)="rollHer()"
-              [disabled]="herRolling"
+              [disabled]="herRolling || herMoveBusy || !isHerTurn"
               aria-label="Roll dice for her"
             >
               <svg
                 class="ludo-game__dice-3d"
                 [class.ludo-game__dice-3d--roll]="herRolling"
-                [class.ludo-game__dice-3d--spin]="diceHerSpin && !herRolling"
                 viewBox="0 0 64 64"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
@@ -47,12 +56,20 @@
                 <circle *ngFor="let d of herDots()" [attr.cx]="d[0]" [attr.cy]="d[1]" r="3" [attr.fill]="herDiceColors.dot" />
               </svg>
             </button>
-            <span class="ludo-game__dice-lbl">ROLL</span>
+            <button
+              type="button"
+              class="ludo-game__dice-lbl"
+              (click)="rollHer()"
+              [disabled]="herRolling || herMoveBusy || !isHerTurn"
+              aria-label="Roll dice for her"
+            >
+              ROLL
+            </button>
             <button
               type="button"
               class="ludo-game__play-bar"
               (click)="playHer()"
-              [disabled]="herRolling"
+              [disabled]="herRolling || herMoveBusy || !isHerTurn"
             >
               <i class="bi bi-play-fill ludo-game__play-bar-icon" aria-hidden="true"></i>
               Play
@@ -62,105 +79,123 @@
       </aside>
 
       <!-- Scrollable grid -->
-      <div class="ludo-game__inner">
-        <div class="ludo-game__grid" *ngFor="let row of trackRows; trackBy: trackRowByIndex">
-          <ng-container *ngFor="let slot of row; trackBy: trackSlotByKind">
-            <!-- GO -->
-            <div *ngIf="slot.kind === 'go'" class="ludo-game__go-card">
-              <span class="ludo-game__go-label">GO</span>
-              <span class="ludo-game__go-sub">START</span>
-            </div>
-
-            <!-- PLAYERS (first card): hidden until tap, same ? + Sl. No. as deck -->
-            <ng-container *ngIf="slot.kind === 'players'">
-              <button
-                *ngIf="isDeckHidden(slot.card)"
-                type="button"
-                class="ludo-game__cell ludo-game__cell--mystery"
-                (click)="revealDeckCell(slot.card)"
-                [attr.aria-label]="'Hidden tile, Sl. No. ' + trackSerialNo(slot.card) + ', tap to reveal PLAYERS'"
+      <div class="ludo-game__inner" #boardInner>
+        <div class="ludo-game__grid" *ngFor="let row of trackRows; let ri = index; trackBy: trackRowByIndex">
+          <ng-container *ngFor="let slot of row; let ci = index; trackBy: trackSlotByKind">
+            <div
+              class="ludo-game__track-slot"
+              [attr.data-track-index]="cellIndex(ri, ci)"
+              [class.ludo-game__track-slot--her]="isHerAt(ri, ci)"
+              [class.ludo-game__track-slot--his]="isHimAt(ri, ci)"
+              [class.ludo-game__track-slot--board-flip]="boardFlipTrackIndex === cellIndex(ri, ci)"
+            >
+              <div
+                class="ludo-game__pawn-badges"
+                *ngIf="isHerAt(ri, ci) || isHimAt(ri, ci)"
               >
-                <span class="ludo-game__mystery-q" aria-hidden="true">?</span>
-                <span class="ludo-game__mystery-sl">
-                  <span class="ludo-game__mystery-sl-label">Sl. No.</span>
-                  <span class="ludo-game__mystery-sl-num">{{ trackSerialNo(slot.card) }}</span>
-                </span>
-              </button>
-              <div *ngIf="!isDeckHidden(slot.card)" class="ludo-game__players-card">
-                <img
-                  *ngIf="slot.card.img"
-                  [src]="slot.card.img"
-                  alt=""
-                  class="ludo-game__players-img"
-                />
-                <svg
-                  *ngIf="!slot.card.img"
-                  viewBox="0 0 44 32"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <circle cx="14" cy="9" r="6" fill="#c084fc" />
-                  <path d="M2 30 Q2 20 14 20 Q26 20 26 30Z" fill="#c084fc" />
-                  <circle cx="30" cy="9" r="6" fill="#60a5fa" />
-                  <path d="M18 30 Q18 20 30 20 Q42 20 42 30Z" fill="#60a5fa" />
-                </svg>
-                <span class="ludo-game__pc-label">PLAYERS</span>
+                <span
+                  *ngIf="isHerAt(ri, ci)"
+                  class="ludo-game__pawn-badge ludo-game__pawn-badge--her"
+                >{{ herPawnLabel }}</span>
+                <span
+                  *ngIf="isHimAt(ri, ci)"
+                  class="ludo-game__pawn-badge ludo-game__pawn-badge--his"
+                >{{ hisPawnLabel }}</span>
               </div>
-            </ng-container>
 
-            <!-- Deck: openStatus 0 = blank (? + Sl. No.); 1+ = real tile -->
-            <ng-container *ngIf="slot.kind === 'deck'">
-              <button
-                *ngIf="isDeckHidden(slot.card)"
-                type="button"
-                class="ludo-game__cell ludo-game__cell--mystery"
-                (click)="revealDeckCell(slot.card)"
-                [attr.aria-label]="'Hidden tile, Sl. No. ' + trackSerialNo(slot.card) + ', tap to reveal'"
-              >
-                <span class="ludo-game__mystery-q" aria-hidden="true">?</span>
-                <span class="ludo-game__mystery-sl">
-                  <span class="ludo-game__mystery-sl-label">Sl. No.</span>
-                  <span class="ludo-game__mystery-sl-num">{{ trackSerialNo(slot.card) }}</span>
-                </span>
-              </button>
+              <!-- GO -->
+              <div *ngIf="slot.kind === 'go'" class="ludo-game__go-card">
+                <span class="ludo-game__go-label">GO</span>
+                <span class="ludo-game__go-sub">START</span>
+              </div>
 
-              <ng-container *ngIf="!isDeckHidden(slot.card)">
+              <!-- PLAYERS (first card): hidden until tap, same ? + Sl. No. as deck -->
+              <ng-container *ngIf="slot.kind === 'players'">
                 <div
-                  *ngIf="bonusBadgeLabel(slot.card) as bl"
-                  class="ludo-game__cell ludo-game__cell--plus"
+                  *ngIf="isDeckHidden(slot.card)"
+                  class="ludo-game__cell ludo-game__cell--mystery ludo-game__cell--locked"
+                  [attr.aria-label]="'Hidden tile, Sl. No. ' + trackSerialNo(slot.card) + ', land here with a dice roll to reveal'"
                 >
-                  <div class="ludo-game__plus-inner">
-                    <div class="ludo-game__plus-badge">{{ bl }}</div>
-                  </div>
+                  <span class="ludo-game__mystery-q" aria-hidden="true">?</span>
+                  <span class="ludo-game__mystery-sl">
+                    <span class="ludo-game__mystery-sl-label">Sl. No.</span>
+                    <span class="ludo-game__mystery-sl-num">{{ trackSerialNo(slot.card) }}</span>
+                  </span>
                 </div>
-                <div
-                  *ngIf="!bonusBadgeLabel(slot.card) && isSkipCard(slot.card)"
-                  class="ludo-game__cell ludo-game__cell--cross"
-                >
+                <div *ngIf="!isDeckHidden(slot.card)" class="ludo-game__players-card">
                   <img
                     *ngIf="slot.card.img"
                     [src]="slot.card.img"
                     alt=""
-                    class="ludo-game__skip-img"
+                    class="ludo-game__players-img"
                   />
-                  <div *ngIf="!slot.card.img" class="ludo-game__cross-icon">
-                    <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle cx="23" cy="23" r="21" fill="#2a1a4a" stroke="#6b4fc4" stroke-width="1.5" />
-                      <line x1="14" y1="14" x2="32" y2="32" stroke="#c084fc" stroke-width="3" stroke-linecap="round" />
-                      <line x1="32" y1="14" x2="14" y2="32" stroke="#c084fc" stroke-width="3" stroke-linecap="round" />
-                    </svg>
-                  </div>
+                  <svg
+                    *ngIf="!slot.card.img"
+                    viewBox="0 0 44 32"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <circle cx="14" cy="9" r="6" fill="#c084fc" />
+                    <path d="M2 30 Q2 20 14 20 Q26 20 26 30Z" fill="#c084fc" />
+                    <circle cx="30" cy="9" r="6" fill="#60a5fa" />
+                    <path d="M18 30 Q18 20 30 20 Q42 20 42 30Z" fill="#60a5fa" />
+                  </svg>
+                  <span class="ludo-game__pc-label">PLAYERS</span>
                 </div>
-                <button
-                  *ngIf="!bonusBadgeLabel(slot.card) && !isSkipCard(slot.card) && isFaceCard(slot.card)"
-                  type="button"
-                  class="ludo-game__cell"
-                  (click)="onDeckCardClick(slot.card)"
-                >
-                  <span class="ludo-game__cell-num">{{ slot.card.id }}</span>
-                </button>
               </ng-container>
-            </ng-container>
+
+              <!-- Deck: openStatus 0 = blank (? + Sl. No.); 1+ = real tile -->
+              <ng-container *ngIf="slot.kind === 'deck'">
+                <div
+                  *ngIf="isDeckHidden(slot.card)"
+                  class="ludo-game__cell ludo-game__cell--mystery ludo-game__cell--locked"
+                  [attr.aria-label]="'Hidden tile, Sl. No. ' + trackSerialNo(slot.card) + ', land here with a dice roll to reveal'"
+                >
+                  <span class="ludo-game__mystery-q" aria-hidden="true">?</span>
+                  <span class="ludo-game__mystery-sl">
+                    <span class="ludo-game__mystery-sl-label">Sl. No.</span>
+                    <span class="ludo-game__mystery-sl-num">{{ trackSerialNo(slot.card) }}</span>
+                  </span>
+                </div>
+
+                <ng-container *ngIf="!isDeckHidden(slot.card)">
+                  <div
+                    *ngIf="bonusBadgeLabel(slot.card) as bl"
+                    class="ludo-game__cell ludo-game__cell--plus"
+                  >
+                    <div class="ludo-game__plus-inner">
+                      <div class="ludo-game__plus-badge">{{ bl }}</div>
+                    </div>
+                  </div>
+                  <div
+                    *ngIf="!bonusBadgeLabel(slot.card) && isSkipCard(slot.card)"
+                    class="ludo-game__cell ludo-game__cell--cross"
+                  >
+                    <img
+                      *ngIf="slot.card.img"
+                      [src]="slot.card.img"
+                      alt=""
+                      class="ludo-game__skip-img"
+                    />
+                    <div *ngIf="!slot.card.img" class="ludo-game__cross-icon">
+                      <svg viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <circle cx="23" cy="23" r="21" fill="#2a1a4a" stroke="#6b4fc4" stroke-width="1.5" />
+                        <line x1="14" y1="14" x2="32" y2="32" stroke="#c084fc" stroke-width="3" stroke-linecap="round" />
+                        <line x1="32" y1="14" x2="14" y2="32" stroke="#c084fc" stroke-width="3" stroke-linecap="round" />
+                      </svg>
+                    </div>
+                  </div>
+                  <button
+                    *ngIf="!bonusBadgeLabel(slot.card) && !isSkipCard(slot.card) && isFaceCard(slot.card)"
+                    type="button"
+                    class="ludo-game__cell"
+                    (click)="onDeckCardClick(slot.card)"
+                  >
+                    <span class="ludo-game__cell-num">{{ slot.card.id }}</span>
+                  </button>
+                </ng-container>
+              </ng-container>
+            </div>
           </ng-container>
         </div>
 
@@ -172,7 +207,11 @@
       </div>
 
       <!-- HIS -->
-      <aside class="ludo-game__side ludo-game__side--his" aria-label="His side">
+      <aside
+        class="ludo-game__side ludo-game__side--his"
+        [class.ludo-game__side--inactive]="!isHisTurn"
+        aria-label="His side"
+      >
         <div class="ludo-game__side-inner">
           <div class="ludo-game__side-head">
             <div class="ludo-game__avatar ludo-game__avatar--his" aria-hidden="true">♂</div>
@@ -185,6 +224,7 @@
             <div
               class="ludo-game__dice-readout ludo-game__dice-readout--his"
               [class.ludo-game__dice-readout--rolling]="himRolling"
+              [class.ludo-game__dice-readout--flash]="himReadoutFlash"
               aria-live="polite"
             >
               {{ himReadout }}
@@ -195,13 +235,12 @@
               type="button"
               class="ludo-game__dice-wrap"
               (click)="rollHim()"
-              [disabled]="himRolling"
+              [disabled]="himRolling || himMoveBusy || !isHisTurn"
               aria-label="Roll dice for him"
             >
               <svg
                 class="ludo-game__dice-3d"
                 [class.ludo-game__dice-3d--roll]="himRolling"
-                [class.ludo-game__dice-3d--spin]="diceHimSpin && !himRolling"
                 viewBox="0 0 64 64"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
@@ -212,12 +251,20 @@
                 <circle *ngFor="let d of himDots()" [attr.cx]="d[0]" [attr.cy]="d[1]" r="3" [attr.fill]="hisDiceColors.dot" />
               </svg>
             </button>
-            <span class="ludo-game__dice-lbl">ROLL</span>
+            <button
+              type="button"
+              class="ludo-game__dice-lbl"
+              (click)="rollHim()"
+              [disabled]="himRolling || himMoveBusy || !isHisTurn"
+              aria-label="Roll dice for him"
+            >
+              ROLL
+            </button>
             <button
               type="button"
               class="ludo-game__play-bar ludo-game__play-bar--his"
               (click)="playHim()"
-              [disabled]="himRolling"
+              [disabled]="himRolling || himMoveBusy || !isHisTurn"
             >
               <i class="bi bi-play-fill ludo-game__play-bar-icon" aria-hidden="true"></i>
               Play
@@ -225,6 +272,188 @@
           </div>
         </div>
       </aside>
+    </div>
+  </div>
+
+  <div
+    *ngIf="cardActionModalOpen && cardActionModalCard as ac"
+    class="ludo-game__card-action-overlay"
+    [class.ludo-game__card-action-overlay--enter]="cardActionModalEnter"
+    (click)="dismissCardActionModal()"
+  >
+    <div
+      class="ludo-game__card-action-dialog"
+      [class.ludo-game__card-action-dialog--enter]="cardActionModalEnter"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ludo-card-action-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="ludo-game__card-action-head">
+        <h2 id="ludo-card-action-title" class="ludo-game__card-action-title">
+          {{ cardActionModalPlayerName }}
+        </h2>
+      </div>    
+      <div class="ludo-game__card-action-preview">
+        <div *ngIf="isModalCardType(ac)" class="ludo-game__card-action-cardface">
+          <div class="ludo-game__card-action-cardframe">
+            <img *ngIf="ac.img" [src]="ac.img" alt="" class="ludo-game__card-action-img" />
+            <span *ngIf="!ac.img" class="ludo-game__card-action-cardnum" aria-hidden="true">{{ ac.id }}</span>
+          </div>
+          <p class="ludo-game__card-action-caption">{{ ac.value }}</p>
+        </div>
+        <div *ngIf="isModalDareType(ac)" class="ludo-game__card-action-dare">
+          <p class="ludo-game__card-action-dare-text">{{ ac.value }}</p>
+        </div>
+      </div>
+      <div class="ludo-game__card-action-btns">
+        <button
+          type="button"
+          class="ludo-game__card-action-btn ludo-game__card-action-btn--no"
+          (click)="onCardActionNotComplete()"
+        >
+          Not complete
+        </button>
+        <button
+          type="button"
+          class="ludo-game__card-action-btn ludo-game__card-action-btn--ok"
+          (click)="onCardActionComplete()"
+        >
+          Complete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    *ngIf="rulesModalOpen"
+    class="ludo-game__rules-overlay"
+    (click)="closeRulesModal()"
+  >
+    <div
+      class="ludo-game__rules-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ludo-rules-heading"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="ludo-game__rules-toolbar">
+        <h2 id="ludo-rules-heading" class="ludo-game__rules-main-title">🎯 Game Overview</h2>
+        <button
+          type="button"
+          class="ludo-game__rules-close"
+          (click)="closeRulesModal()"
+          aria-label="Close game rules"
+        >
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="ludo-game__rules-body">
+        <p class="ludo-game__rules-lead">
+          This game is a fun and interactive mix inspired by classic games like Ludo, card-based gameplay, and Snakes and Ladders.
+        </p>
+        <p>
+          It is specially designed for couples (18+) to enjoy playful, romantic, and intimate moments together. The game includes tasks, actions, and challenges that encourage bonding, excitement, and connection.
+        </p>
+        <p class="ludo-game__rules-warn">
+          <strong>⚠️ This game is strictly for adults (18+)</strong> and may include suggestive content.
+        </p>
+
+        <h3 class="ludo-game__rules-h3">🧩 Game Components</h3>
+        <ul class="ludo-game__rules-list">
+          <li><strong>🎴 48 Cards Total</strong></li>
+          <li>36 Task Cards – Perform fun, romantic, or playful challenges</li>
+          <li>7 Bonus Cards – Give extra forward movement</li>
+          <li>5 Block (Skip) Cards – Provide protection or skip ability</li>
+          <li><strong>🎲 Dice</strong> (for movement)</li>
+        </ul>
+
+        <h3 class="ludo-game__rules-h3">▶️ Gameplay Rules</h3>
+
+        <h4 class="ludo-game__rules-h4">📌 Rule 1: Starting the Game</h4>
+        <p>
+          Players take turns rolling the dice. The number rolled determines how many steps they move forward on the board.
+        </p>
+
+        <h4 class="ludo-game__rules-h4">📌 Rule 2: Card Action</h4>
+        <p>After moving, the player lands on a card:</p>
+        <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
+          <li>The card is opened</li>
+          <li>A task or action is revealed</li>
+          <li>The player must perform the task</li>
+        </ul>
+
+        <h4 class="ludo-game__rules-h4">📌 Rule 3: Task Completion</h4>
+        <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
+          <li>✅ If the player performs the task → continue normally</li>
+          <li>❌ If the player refuses or fails → move backward by same steps + 2 extra steps</li>
+        </ul>
+
+        <h4 class="ludo-game__rules-h4">📌 Rule 4: Bonus Cards</h4>
+        <p>If a player lands on a Bonus Card:</p>
+        <p>They move forward immediately based on the card:</p>
+        <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
+          <li>+1 step</li>
+          <li>+2 steps</li>
+          <li>+3 steps</li>
+        </ul>
+
+        <h4 class="ludo-game__rules-h4">📌 Rule 5: Block (Skip) Cards – Safe Zone</h4>
+        <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
+          <li>If two players land on the same Block Card, both are safe</li>
+          <li>No penalty or task is applied</li>
+        </ul>
+
+        <h4 class="ludo-game__rules-h4">📌 Rule 6: Block Power (Special Ability)</h4>
+        <p>Passing a Block Card gives 1 Block Power. This can be used to:</p>
+        <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
+          <li>Skip any one task</li>
+          <li>Avoid penalty completely</li>
+        </ul>
+        <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
+          <li>✔ Can be used anytime</li>
+          <li>✔ One-time use per Block Power</li>
+          <li>✔ Only one Block Power can be used per turn</li>
+        </ul>
+
+        <h4 class="ludo-game__rules-h4">📌 Rule 7: Collision Rule</h4>
+        <p>If Player 2 lands on Player 1’s position:</p>
+        <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
+          <li>Player 2 takes the position</li>
+          <li>Player 1 moves 3 steps backward</li>
+          <li>Player 1 must perform the new card’s task</li>
+        </ul>
+
+        <h4 class="ludo-game__rules-h4">📌 Rule 8: Block Protection in Collision</h4>
+        <p>If the affected player has a Block Power:</p>
+        <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
+          <li>It is automatically used</li>
+          <li>No backward movement</li>
+          <li>No task required</li>
+        </ul>
+
+        <h4 class="ludo-game__rules-h4">📌 Rule 9: Block Card Strategy</h4>
+        <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
+          <li>Block Powers can be saved and used later</li>
+          <li>Even if you have multiple, only one can be used at a time</li>
+          <li>Each Block Power is consumed after use</li>
+        </ul>
+
+        <h3 class="ludo-game__rules-h3">🏆 Winning the Game</h3>
+        <p>The player who reaches the final position wins the game.</p>
+        <p>
+          However, the main goal is not just winning — it’s about enjoying time together, creating connection, and sharing fun, romantic experiences.
+        </p>
+
+        <h3 class="ludo-game__rules-h3">❤️ Final Note</h3>
+        <p>This game is designed to:</p>
+        <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
+          <li>Encourage bonding</li>
+          <li>Create fun and excitement</li>
+          <li>Build intimacy in a lighthearted way</li>
+        </ul>
+        <p class="ludo-game__rules-footer-note">Enjoy the journey more than the result 😊</p>
+      </div>
     </div>
   </div>
 
