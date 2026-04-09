@@ -24,6 +24,11 @@
               <span class="ludo-game__player-name">{{ herName }}</span>
               <span class="ludo-game__player-role">HER</span>
             </div>
+            <div class="ludo-game__block-power" aria-label="Her block power">
+              <span class="ludo-game__block-power-label">Block</span>
+              <span class="ludo-game__block-power-count">{{ herBlockPowerStock }}</span>
+              <span *ngIf="herBlockPowerUsedThisTurn" class="ludo-game__block-power-used">used</span>
+            </div>
           </div>
           <div class="ludo-game__side-spacer">
             <div
@@ -40,7 +45,7 @@
               type="button"
               class="ludo-game__dice-wrap"
               (click)="rollHer()"
-              [disabled]="herRolling || herMoveBusy || !isHerTurn"
+              [disabled]="herRolling || herMoveBusy || !isHerTurn || gameWinner"
               aria-label="Roll dice for her"
             >
               <svg
@@ -60,7 +65,7 @@
               type="button"
               class="ludo-game__dice-lbl"
               (click)="rollHer()"
-              [disabled]="herRolling || herMoveBusy || !isHerTurn"
+              [disabled]="herRolling || herMoveBusy || !isHerTurn || gameWinner"
               aria-label="Roll dice for her"
             >
               ROLL
@@ -69,7 +74,7 @@
               type="button"
               class="ludo-game__play-bar"
               (click)="playHer()"
-              [disabled]="herRolling || herMoveBusy || !isHerTurn"
+              [disabled]="herRolling || herMoveBusy || !isHerTurn || gameWinner"
             >
               <i class="bi bi-play-fill ludo-game__play-bar-icon" aria-hidden="true"></i>
               Play
@@ -122,25 +127,32 @@
                     <span class="ludo-game__mystery-sl-num">{{ trackSerialNo(slot.card) }}</span>
                   </span>
                 </div>
-                <div *ngIf="!isDeckHidden(slot.card)" class="ludo-game__players-card">
-                  <img
-                    *ngIf="slot.card.img"
-                    [src]="slot.card.img"
-                    alt=""
-                    class="ludo-game__players-img"
-                  />
-                  <svg
-                    *ngIf="!slot.card.img"
-                    viewBox="0 0 44 32"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <circle cx="14" cy="9" r="6" fill="#c084fc" />
-                    <path d="M2 30 Q2 20 14 20 Q26 20 26 30Z" fill="#c084fc" />
-                    <circle cx="30" cy="9" r="6" fill="#60a5fa" />
-                    <path d="M18 30 Q18 20 30 20 Q42 20 42 30Z" fill="#60a5fa" />
-                  </svg>
-                  <span class="ludo-game__pc-label">PLAYERS</span>
+                <div
+                  *ngIf="!isDeckHidden(slot.card)"
+                  class="ludo-game__players-card"
+                  [class.ludo-game__players-card--dare]="isModalDareType(slot.card)"
+                >
+                  <ng-container *ngIf="!isModalDareType(slot.card)">
+                    <img
+                      *ngIf="slot.card.img"
+                      [src]="slot.card.img"
+                      alt=""
+                      class="ludo-game__players-img"
+                    />
+                    <svg
+                      *ngIf="!slot.card.img"
+                      viewBox="0 0 44 32"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      <circle cx="14" cy="9" r="6" fill="#c084fc" />
+                      <path d="M2 30 Q2 20 14 20 Q26 20 26 30Z" fill="#c084fc" />
+                      <circle cx="30" cy="9" r="6" fill="#60a5fa" />
+                      <path d="M18 30 Q18 20 30 20 Q42 20 42 30Z" fill="#60a5fa" />
+                    </svg>
+                    <span class="ludo-game__pc-label">PLAYERS</span>
+                  </ng-container>
+                  <p *ngIf="isModalDareType(slot.card)" class="ludo-game__players-dare-open">{{ slot.card.value }}</p>
                 </div>
               </ng-container>
 
@@ -149,6 +161,7 @@
                 <div
                   *ngIf="isDeckHidden(slot.card)"
                   class="ludo-game__cell ludo-game__cell--mystery ludo-game__cell--locked"
+                  [class.ludo-game__cell--finish]="isFinaleDeckCard(slot.card)"
                   [attr.aria-label]="'Hidden tile, Sl. No. ' + trackSerialNo(slot.card) + ', land here with a dice roll to reveal'"
                 >
                   <span class="ludo-game__mystery-q" aria-hidden="true">?</span>
@@ -189,9 +202,19 @@
                     *ngIf="!bonusBadgeLabel(slot.card) && !isSkipCard(slot.card) && isFaceCard(slot.card)"
                     type="button"
                     class="ludo-game__cell"
+                    [class.ludo-game__cell--finish]="isFinaleDeckCard(slot.card)"
+                    [class.ludo-game__cell--dare-board]="isModalDareType(slot.card)"
+                    [class.ludo-game__cell--card-board]="isModalCardType(slot.card) && slot.card.img"
                     (click)="onDeckCardClick(slot.card)"
                   >
-                    <span class="ludo-game__cell-num">{{ slot.card.id }}</span>
+                    <img
+                      *ngIf="isModalCardType(slot.card) && slot.card.img"
+                      [src]="slot.card.img"
+                      alt=""
+                      class="ludo-game__cell-card-img"
+                    />
+                    <span *ngIf="isModalDareType(slot.card)" class="ludo-game__cell-dare-text">{{ slot.card.value }}</span>
+                    <span *ngIf="isModalCardType(slot.card) && !slot.card.img" class="ludo-game__cell-num">{{ slot.card.id }}</span>
                   </button>
                 </ng-container>
               </ng-container>
@@ -219,6 +242,11 @@
               <span class="ludo-game__player-name">{{ hisName }}</span>
               <span class="ludo-game__player-role">HIS</span>
             </div>
+            <div class="ludo-game__block-power" aria-label="His block power">
+              <span class="ludo-game__block-power-label">Block</span>
+              <span class="ludo-game__block-power-count">{{ himBlockPowerStock }}</span>
+              <span *ngIf="himBlockPowerUsedThisTurn" class="ludo-game__block-power-used">used</span>
+            </div>
           </div>
           <div class="ludo-game__side-spacer">
             <div
@@ -235,7 +263,7 @@
               type="button"
               class="ludo-game__dice-wrap"
               (click)="rollHim()"
-              [disabled]="himRolling || himMoveBusy || !isHisTurn"
+              [disabled]="himRolling || himMoveBusy || !isHisTurn || gameWinner"
               aria-label="Roll dice for him"
             >
               <svg
@@ -255,7 +283,7 @@
               type="button"
               class="ludo-game__dice-lbl"
               (click)="rollHim()"
-              [disabled]="himRolling || himMoveBusy || !isHisTurn"
+              [disabled]="himRolling || himMoveBusy || !isHisTurn || gameWinner"
               aria-label="Roll dice for him"
             >
               ROLL
@@ -264,7 +292,7 @@
               type="button"
               class="ludo-game__play-bar ludo-game__play-bar--his"
               (click)="playHim()"
-              [disabled]="himRolling || himMoveBusy || !isHisTurn"
+              [disabled]="himRolling || himMoveBusy || !isHisTurn || gameWinner"
             >
               <i class="bi bi-play-fill ludo-game__play-bar-icon" aria-hidden="true"></i>
               Play
@@ -321,6 +349,14 @@
         >
           Complete
         </button>
+        <button
+          *ngIf="cardActionModalCanUseBlockPower"
+          type="button"
+          class="ludo-game__card-action-btn ludo-game__card-action-btn--block"
+          (click)="onUseBlockPowerInModal()"
+        >
+          Use Block power
+        </button>
       </div>
     </div>
   </div>
@@ -361,10 +397,13 @@
 
         <h3 class="ludo-game__rules-h3">🧩 Game Components</h3>
         <ul class="ludo-game__rules-list">
-          <li><strong>🎴 48 Cards Total</strong></li>
-          <li>36 Task Cards – Perform fun, romantic, or playful challenges</li>
-          <li>7 Bonus Cards – Give extra forward movement</li>
-          <li>5 Block (Skip) Cards – Provide protection or skip ability</li>
+          <li>
+            <strong>48 cards</strong> on the track after GO (matches the deck); the <strong>last card</strong> (highest Sl. No.) is
+            the finish — win by landing there after your turn resolves
+          </li>
+          <li>Mix of dares, picture cards, bonus, and skip tiles</li>
+          <li>6 bonus cards (+1 / +2 / +3 forward)</li>
+          <li>5 Block (Skip) cards — Block power &amp; safe-zone rules</li>
           <li><strong>🎲 Dice</strong> (for movement)</li>
         </ul>
 
@@ -373,6 +412,11 @@
         <h4 class="ludo-game__rules-h4">📌 Rule 1: Starting the Game</h4>
         <p>
           Players take turns rolling the dice. The number rolled determines how many steps they move forward on the board.
+        </p>
+        <p>
+          <strong>Exact finish (dice):</strong> the <strong>last tile</strong> on the path (highest Sl. No. on the board) is the
+          finish. Your <strong>dice</strong> must bring you <strong>exactly</strong> onto that space. If your roll would jump
+          <strong>past</strong> it, your pawn <strong>does not move</strong> and your <strong>turn ends</strong>.
         </p>
 
         <h4 class="ludo-game__rules-h4">📌 Rule 2: Card Action</h4>
@@ -385,8 +429,15 @@
 
         <h4 class="ludo-game__rules-h4">📌 Rule 3: Task Completion</h4>
         <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
-          <li>✅ If the player performs the task → continue normally</li>
-          <li>❌ If the player refuses or fails → move backward by same steps + 2 extra steps</li>
+          <li>✅ Tap <strong>Complete</strong> if the task was done → turn ends as normal.</li>
+          <li>
+            ❌ Tap <strong>Not complete</strong> if they refuse or fail → their pawn moves <strong>backward</strong> by
+            <strong>this turn’s dice roll + 2</strong> (e.g. roll 4 → move back 6), then the turn ends. Stops at GO.
+          </li>
+          <li>
+            🛡 Or tap <strong>Use Block power</strong> (if you have stock and haven’t spent one this roll cycle) to skip the task
+            and <strong>avoid the penalty</strong> — costs 1 Block power.
+          </li>
         </ul>
 
         <h4 class="ludo-game__rules-h4">📌 Rule 4: Bonus Cards</h4>
@@ -400,47 +451,74 @@
 
         <h4 class="ludo-game__rules-h4">📌 Rule 5: Block (Skip) Cards – Safe Zone</h4>
         <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
-          <li>If two players land on the same Block Card, both are safe</li>
-          <li>No penalty or task is applied</li>
+          <li>If two players are on the <strong>same Block (Skip) tile</strong>, it is a safe zone.</li>
+          <li>No collision bump — the mover stays and the other is <strong>not</strong> pushed back.</li>
+          <li>No extra task from that collision; the tile behaves like a normal Skip (turn ends, no card modal).</li>
         </ul>
 
         <h4 class="ludo-game__rules-h4">📌 Rule 6: Block Power (Special Ability)</h4>
-        <p>Passing a Block Card gives 1 Block Power. This can be used to:</p>
+        <p>
+          You earn Block power only when your pawn <strong>lands on a Block (Skip) tile from a dice roll</strong> and that tile
+          <strong>opens for the first time</strong> (the “?” reveals). <strong>Max 1</strong> charge per player — if you already
+          have 1, opening another Block tile on a later dice landing still leaves you at <strong>1</strong>. After you
+          <strong>use</strong> it (task modal or collision auto-use), stock goes to <strong>0</strong>; the next qualifying
+          open sets it back to <strong>1</strong>. Bonus slides and collision push-backs do <strong>not</strong> grant power.
+        </p>
+        <p>From the task modal you can use it to:</p>
         <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
-          <li>Skip any one task</li>
-          <li>Avoid penalty completely</li>
+          <li>Skip the current task</li>
+          <li>Avoid the “Not complete” penalty for that task</li>
         </ul>
         <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
-          <li>✔ Can be used anytime</li>
-          <li>✔ One-time use per Block Power</li>
-          <li>✔ Only one Block Power can be used per turn</li>
+          <li>✔ You can use it whenever the button appears (you have stock).</li>
+          <li>✔ Each spend uses <strong>one</strong> Block power from your stock.</li>
+          <li>
+            ✔ During one full roll-to-resolve cycle (including collision chains), each player can spend <strong>at most once</strong>;
+            stock carries over — next turn you can spend again if you still have power.
+          </li>
         </ul>
 
         <h4 class="ludo-game__rules-h4">📌 Rule 7: Collision Rule</h4>
-        <p>If Player 2 lands on Player 1’s position:</p>
+        <p>If the moving player lands on the same tile as the other (not GO, and not a shared Block safe tile — see Rule 5):</p>
         <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
-          <li>Player 2 takes the position</li>
-          <li>Player 1 moves 3 steps backward</li>
-          <li>Player 1 must perform the new card’s task</li>
+          <li>
+            If <strong>Rule 8</strong> applies (bumped player can spend Block power), that runs <strong>instead</strong> of the push below.
+          </li>
+          <li>Otherwise the <strong>mover</strong> stays on that tile.</li>
+          <li>The <strong>bumped</strong> player moves <strong>3 steps backward</strong> (stops at GO).</li>
+          <li>The <strong>bumped</strong> player resolves the new tile <strong>first</strong> (bonus / skip / card task).</li>
+          <li>Then the <strong>mover</strong> resolves the tile they landed on.</li>
         </ul>
 
         <h4 class="ludo-game__rules-h4">📌 Rule 8: Block Protection in Collision</h4>
-        <p>If the affected player has a Block Power:</p>
+        <p>If the <strong>bumped</strong> player has Block power available to spend (stock and not already used this roll cycle — same rule as the task modal):</p>
         <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
-          <li>It is automatically used</li>
-          <li>No backward movement</li>
-          <li>No task required</li>
+          <li><strong>One</strong> Block power is <strong>automatically</strong> consumed.</li>
+          <li><strong>No</strong> backward movement.</li>
+          <li><strong>No</strong> collision task for the bumped player — the <strong>mover</strong> resolves their landing tile next.</li>
         </ul>
+        <p>
+          For a normal <strong>card / dare task</strong> (not collision), you still choose: <strong>Complete</strong>,
+          <strong>Not complete</strong> (penalty), or <strong>Use Block power</strong> when the button is shown.
+        </p>
 
         <h4 class="ludo-game__rules-h4">📌 Rule 9: Block Card Strategy</h4>
         <ul class="ludo-game__rules-list ludo-game__rules-list--compact">
-          <li>Block Powers can be saved and used later</li>
-          <li>Even if you have multiple, only one can be used at a time</li>
-          <li>Each Block Power is consumed after use</li>
+          <li>Stock is <strong>0 or 1</strong> only (same for both players).</li>
+          <li>Only <strong>one spend</strong> per player per full roll-to-resolve cycle (task modal or collision auto-use).</li>
+          <li>Each spend clears your charge back to <strong>0</strong>.</li>
+          <li>
+            <strong>Collision</strong>: if eligible, protection is <strong>automatic</strong>. <strong>Tasks</strong>: Complete, Not complete, or Use Block power.
+          </li>
         </ul>
 
         <h3 class="ludo-game__rules-h3">🏆 Winning the Game</h3>
-        <p>The player who reaches the final position wins the game.</p>
+        <p>
+          The <strong>last card</strong> on the track is the finish. You must <strong>dice onto it exactly</strong> (see Rule 1).
+          When your pawn is on that tile after your turn’s resolution completes (bonuses, tasks, collisions), you
+          <strong>win</strong> — the win screen shows a fun message for the couple. If both share the finish after resolution,
+          it’s a <strong>tie</strong>. Use <strong>Play again</strong> to reset the board with the same names.
+        </p>
         <p>
           However, the main goal is not just winning — it’s about enjoying time together, creating connection, and sharing fun, romantic experiences.
         </p>
@@ -454,6 +532,22 @@
         </ul>
         <p class="ludo-game__rules-footer-note">Enjoy the journey more than the result 😊</p>
       </div>
+    </div>
+  </div>
+
+  <div
+    *ngIf="gameWinner"
+    class="ludo-game__win-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ludo-win-title"
+  >
+    <div class="ludo-game__win-card" (click)="$event.stopPropagation()">
+      <h2 id="ludo-win-title" class="ludo-game__win-title">{{ winnerHeadline }}</h2>
+      <p class="ludo-game__win-sub">You reached the final space — great game together.</p>
+      <p *ngIf="winTauntMessage" class="ludo-game__win-taunt">{{ winTauntMessage }}</p>
+      <button type="button" class="ludo-game__win-btn" (click)="startNewRound()">Play again</button>
+      <a routerLink="/ludocard" class="ludo-game__win-link">Back to setup</a>
     </div>
   </div>
 

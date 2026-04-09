@@ -24,78 +24,61 @@ export interface LudocardDeckItem {
 })
 export class LudocardDeckService {
   readonly cards: LudocardDeckItem[] = [
-    { id: 1, value: 'Card 1', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/couple.svg', openStatus: 0 },
-    { id: 2, value: 'Card 2', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-02.svg', openStatus: 0 },
-    { id: 3, value: 'Card 3', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-03.svg', openStatus: 0 },
-    { id: 4, value: 'Card 4', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-04.svg', openStatus: 0 },
-    { id: 5, value: 'Card 5', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-05.svg', openStatus: 0 },
-
+    { id: 1, value: 'Give me a 1-minute shoulder massage.', type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-01.svg', openStatus: 0 },
+    { id: 2, value: "Smell and sniff any favorite part of your partner's body.", type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-02.svg', openStatus: 0 },
+    { id: 3, value: 'Place a kiss on my hand and pretend you’re a prince/princess.', type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-03.svg', openStatus: 0 },
+    { id: 4, value: 'Lick your partners upper lip', type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-04.svg', openStatus: 0 },
+    { id: 5, value: 'Open Your Dress', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/opendress.jpg', openStatus: 0 },
     { id: 6, value: 'Bonus +2', type: LUDOCARD_TYPE_BONUS, img: null, bonus: 2, openStatus: 0 },
-
-    { id: 7, value: 'Card 7', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-07.svg', openStatus: 0 },
-    { id: 8, value: 'Card 8', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-08.svg', openStatus: 0 },
-    { id: 9, value: 'Card 9', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-09.svg', openStatus: 0 },
-
+    { id: 7, value: 'Spank On your partner Back And feel it.', type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-07.svg', openStatus: 0 },
+    { id: 8, value: 'Lick your partners lower lip', type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-08.svg', openStatus: 0 },
+    { id: 9, value: "Say 'Eat Me' to your Partner", type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-09.svg', openStatus: 0 },
     { id: 10, value: 'Bonus +1', type: LUDOCARD_TYPE_BONUS, img: null, bonus: 1, openStatus: 0 },
-
-    { id: 11, value: 'Card 11', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-11.svg', openStatus: 0 },
-    { id: 12, value: 'Card 12', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-12.svg', openStatus: 0 },
-    { id: 13, value: 'Card 13', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-13.svg', openStatus: 0 },
-    { id: 14, value: 'Card 14', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-14.svg', openStatus: 0 },
-    { id: 15, value: 'Card 15', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-15.svg', openStatus: 0 },
-
-    { id: 16, value: 'Skip this turn', type: LUDOCARD_TYPE_SKIP, img: 'assets/ludocard/no-symbol.svg', bonus: 0, openStatus: 0 },
-
-    { id: 17, value: 'Card 17', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-17.svg', openStatus: 0 },
-
+    { id: 11, value: 'Kiss on belly', type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-11.svg', openStatus: 0 },
+    { id: 12, value: 'Spank On your partner Back And feel it.', type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-12.svg', openStatus: 0 },
+    { id: 13, value: 'Kiss On your partner lip', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/liokiss.jpg', openStatus: 0 },
+    { id: 14, value: 'kiss on your partner neck', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/neckkiss2.jpg', openStatus: 0 },
+    { id: 15, value: 'kiss on your partner neck', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/neckkiss.jpg', openStatus: 0 },
+    { id: 16, value: 'Skip this turn', type: LUDOCARD_TYPE_SKIP, img: 'assets/ludocard/no-symbol.svg', bonus: 1, openStatus: 0 },
+    { id: 17, value: 'Taste Of Your Partner Sweat', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Tasteofcream.jpg', openStatus: 0 },
     { id: 18, value: 'Bonus +3', type: LUDOCARD_TYPE_BONUS, img: null, bonus: 3, openStatus: 0 },
-
-    { id: 19, value: 'Card 19', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-19.svg', openStatus: 0 },
-    { id: 20, value: 'Card 20', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-20.svg', openStatus: 0 },
-    { id: 21, value: 'Card 21', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-21.svg', openStatus: 0 },
-    { id: 22, value: 'Card 22', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-22.svg', openStatus: 0 },
-
+    { id: 19, value: 'Do your Job ! Blow Job', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/blowjob1.png', openStatus: 0 },
+    { id: 20, value: 'Face under throne', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Faceunderthrone.jpg', openStatus: 0 },
+    { id: 21, value: 'Face off', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Faceoff.jpg', openStatus: 0 },
+    { id: 22, value: 'Card 22', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/ludocard-22.svg', openStatus: 0 },
     { id: 23, value: 'Bonus +3', type: LUDOCARD_TYPE_BONUS, img: null, bonus: 3, openStatus: 0 },
-
-    { id: 24, value: 'Card 24', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-24.svg', openStatus: 0 },
-    { id: 25, value: 'Card 25', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-25.svg', openStatus: 0 },
-
+    { id: 24, value: 'Spank On your partner Back And feel it.', type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-24.svg', openStatus: 0 },
+    { id: 25, value: "Stay close to eachother's lips but try not to kiss till 10 sec", type: LUDOCARD_TYPE_DARE, img: 'assets/xpic/ludocard-25.svg', openStatus: 0 },
     { id: 26, value: 'Skip this turn', type: LUDOCARD_TYPE_SKIP, img: 'assets/ludocard/no-symbol.svg', bonus: 0, openStatus: 0 },
-
-    { id: 27, value: 'Card 27', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-27.svg', openStatus: 0 },
-    { id: 28, value: 'Card 28', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-28.svg', openStatus: 0 },
-
-    { id: 29, value: 'Skip this turn', type: LUDOCARD_TYPE_SKIP, img: 'assets/ludocard/no-symbol.svg', bonus: 0, openStatus: 0 },
-    { id: 30, value: 'Card 30', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-30.svg', openStatus: 0 },
-
+    { id: 27, value: 'Copper field', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Copperfield.jpg', openStatus: 0 },
+    { id: 28, value: 'Do your Job ! Blow Job', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/blowjob2.jpg', openStatus: 0 },
+    { id: 29, value: 'Skip this turn', type: LUDOCARD_TYPE_SKIP, img: 'assets/ludocard/no-symbol.svg', bonus: 1, openStatus: 0 },
+    { id: 30, value: 'Butter Fly', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Butterfly.jpg', openStatus: 0 },
     { id: 31, value: 'Bonus +2', type: LUDOCARD_TYPE_BONUS, img: null, bonus: 2, openStatus: 0 },
-    
-    { id: 32, value: 'Card 32', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-32.svg', openStatus: 0 },
-
-    { id: 33, value: 'Card 33', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-33.svg', openStatus: 0 },
-
-    { id: 34, value: 'Card 34', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-34.svg', openStatus: 0 },
-    { id: 35, value: 'Card 35', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-35.svg', openStatus: 0 },
-    { id: 36, value: 'Card 36', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-36.svg', openStatus: 0 },
-    { id: 37, value: 'Card 37', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-37.svg', openStatus: 0 },    
-
-    { id: 38, value: 'Skip this turn', type: LUDOCARD_TYPE_SKIP, img: 'assets/ludocard/no-symbol.svg', bonus: 0, openStatus: 0 },
-
-    { id: 39, value: 'Card 39', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-39.svg', openStatus: 0 },
-    
+    { id: 32, value: 'Cow Girl', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/cowgirl.jpg', openStatus: 0 },    
+    { id: 33, value: 'open the Leg', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/openleg.jpg', openStatus: 0 },
+    { id: 34, value: 'Leg On shoulder', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Gwhiz.jpg', openStatus: 0 },
+    { id: 35, value: 'Thigh Master', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Thighmaster.jpg', openStatus: 0 },
+    { id: 36, value: 'Pretzel', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Thepretzel.jpg', openStatus: 0 },    
+    { id: 37, value: 'Reverse Cow Girl', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/reversecowgirl.jpg', openStatus: 0 },    
+    { id: 38, value: 'Skip this turn', type: LUDOCARD_TYPE_SKIP, img: 'assets/ludocard/no-symbol.svg', bonus: 1, openStatus: 0 },
+    { id: 39, value: 'Sandwichhhh...', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/missonary1.jpg', openStatus: 0 },    
     { id: 40, value: 'Bonus +2', type: LUDOCARD_TYPE_BONUS, img: null, bonus: 2, openStatus: 0 },
-    { id: 41, value: 'Card 41', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-41.svg', openStatus: 0 },
-
-    { id: 42, value: 'Card 42', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-39.svg', openStatus: 0 },
-    { id: 43, value: 'Card 43', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-40.svg', openStatus: 0 },
-
-    { id: 44, value: 'Skip this turn', type: LUDOCARD_TYPE_SKIP, img: 'assets/ludocard/no-symbol.svg', bonus: 0, openStatus: 0 },
-
-    { id: 45, value: 'Card 45', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-39.svg', openStatus: 0 },
-    { id: 46, value: 'Card 46', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-40.svg', openStatus: 0 },
-    { id: 47, value: 'Card 47', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-41.svg', openStatus: 0 },
-    { id: 48, value: 'Card 48', type: LUDOCARD_TYPE_CARD, img: 'assets/ludocard/ludocard-39.svg', openStatus: 0 },
+    { id: 41, value: 'Learn from Dog', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/doggy.jpg', openStatus: 0 },
+    { id: 42, value: 'Bloom the Lotus', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/lotus1.jpg', openStatus: 0 },
+    { id: 43, value: 'Fell Like Heaven', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Heaven.jpg', openStatus: 0 },
+    { id: 44, value: 'Skip this turn', type: LUDOCARD_TYPE_SKIP, img: 'assets/ludocard/no-symbol.svg', bonus: 1, openStatus: 0 },
+    { id: 45, value: 'Lets Try Horse Ride', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/horseride.jpg', openStatus: 0 },
+    { id: 46, value: 'Try 69 69', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/69pose.jpg', openStatus: 0 },
+    { id: 47, value: 'Try new Swiss Ball', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Swissballorchair.jpg', openStatus: 0 },
+    { id: 48, value: 'Stand And Deliver', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Standanddeliver.jpg', openStatus: 0 },
   ];
+
+  /** Last deck item is the finish line (win + tease overlay after resolution). */
+  get finaleCard(): LudocardDeckItem | undefined {
+    const n = this.cards.length;
+    return n > 0 ? this.cards[n - 1] : undefined;
+  }
 
   getCardByIndex(index: number): LudocardDeckItem | undefined {
     return this.cards[index];

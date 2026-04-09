@@ -37,6 +37,33 @@ const TRACK_STEP_MS = 115;
 const BONUS_REVEAL_PAUSE_MS = 520;
 /** CARD/DARE: board tile flip, then open the action modal (matches flip duration). */
 const BOARD_FLIP_THEN_MODAL_MS = 500;
+/** Rule 7: when a mover lands on the other pawn, the bumped player moves back this many cells. */
+const COLLISION_PUSH_BACK_STEPS = 3;
+// Dice onto the finish: exact count only — overshoot → no move, turn passes (`beginHerMoveAfterDice` / `beginHimMoveAfterDice`).
+
+/** Playful roast toward him when he wins — random one on win overlay. */
+const WIN_TAUNTS_HIM_WON: readonly string[] = [
+  'Bro, final level reached and still no mood? At this point, even NPCs show more interest than you 💀😂',
+  'You completed everything and still like “meh”… bro even weak WiFi connects faster than your feelings 📶😭',
+  'Final stage unlocked and you’re calm? Bhai, this is romance… not yoga class 🧘‍♂️😂',
+  'Bro came all the way to the end just to act innocent… what is this? Tutorial mode? 😭😆',
+  'Oscar goes to you for best “no reaction” performance… even statues have more expression 🗿😂',
+  'If after all this you’re still not in the mood… bro your system didn’t just lag, it crashed completely 💻💀',
+];
+
+/** Playful roast toward her when she wins — random one on win overlay. */
+const WIN_TAUNTS_HER_WON: readonly string[] = [
+  'Girl completed everything and still like “hmm okay”… excuse me?? where is the drama queen energy? 😭😂',
+  'If you’re still not feeling it… I think we need to check your “romance settings” 😆',
+  'If you’re still not feeling anything… I think your “romance app” is not installed properly 😂',
+  'You reached the end just to act innocent… wow, commitment to acting is real 😭😆',
+  'Final stage and you’re this calm? Sis, this is romance… not a meditation retreat 🧘‍♀️😂',
+  'You did everything and still acting “okay okay”… where is the main character energy?? 🎬💀',
+];
+
+function pickRandomString(pool: readonly string[]): string {
+  return pool[Math.floor(Math.random() * pool.length)] ?? '';
+}
 
 @Component({
   selector: 'app-ludo-game',
@@ -112,6 +139,23 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Whose turn landed on this tile — header shows their name. */
   cardActionModalWho: 'her' | 'him' | null = null;
   private pendingTurnAfterCardModal: 'her' | 'him' | null = null;
+  /** Dice value for the current move (used for “Not complete” penalty: back by roll + 2). */
+  private readonly lastDiceRollSteps: Record<'her' | 'him', number> = { her: 1, him: 1 };
+  /** After bumped player fully resolves their new tile, run mover’s landing (same turn). */
+  private afterBumpedResolution: (() => void) | null = null;
+
+  /** 0 or 1 — earned only when a Skip tile first opens on a dice landing; spent → 0. */
+  herBlockPowerStock = 0;
+  himBlockPowerStock = 0;
+  /** At most one Block power may be spent per player per full turn (roll → resolve). */
+  herBlockPowerUsedThisTurn = false;
+  himBlockPowerUsedThisTurn = false;
+
+  /** Rulebook: winning — set when a pawn is on the final track cell after turn resolution. */
+  gameWinner: 'her' | 'him' | 'both' | null = null;
+
+  /** One random playful line on the win overlay (pools depend on who won). */
+  winTauntMessage = '';
 
   private readonly onOrientOrResize = (): void => this.updatePortraitHint();
 
@@ -202,6 +246,7 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pendingMoveTimeouts.forEach((id) => clearTimeout(id));
     this.pendingMoveTimeouts.length = 0;
     this.boardFlipTrackIndex = null;
+    this.afterBumpedResolution = null;
   }
 
   /** Many browsers only lock after a user gesture — retry once after first tap. */
@@ -298,7 +343,7 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.activeTurn === 'him';
   }
 
-  /** Total cells on the track (GO + deck path). */
+  /** Total cells: GO + one slot per deck card (last card = finish). */
   get trackSlotCount(): number {
     if (this.deck.cards.length === 0) {
       return 1;
@@ -394,7 +439,7 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     return card.id;
   }
 
-  /** Card at linear track index: 0 = GO (none), 1 = first card, … */
+  /** Card at linear track index: 0 = GO (none), 1…N = `cards[0]…cards[N-1]` (last = finish). */
   getCardAtTrackIndex(trackIndex: number): LudocardDeckItem | null {
     if (trackIndex <= 0) {
       return null;
@@ -404,6 +449,12 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
       return this.deck.cards[i];
     }
     return null;
+  }
+
+  /** True for the last deck card — finish tile (same as `deck.finaleCard`). */
+  isFinaleDeckCard(card: LudocardDeckItem): boolean {
+    const fin = this.deck.finaleCard;
+    return fin != null && card === fin;
   }
 
   rollHer(): void {
@@ -423,7 +474,7 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private runHerAnimatedRoll(durationMs: number): void {
-    if (this.activeTurn !== 'her' || this.herRolling) {
+    if (this.gameWinner || this.activeTurn !== 'her' || this.herRolling) {
       return;
     }
     this.clearHerPlayRollTimersOnly();
@@ -448,7 +499,7 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private runHimAnimatedRoll(durationMs: number): void {
-    if (this.activeTurn !== 'him' || this.himRolling) {
+    if (this.gameWinner || this.activeTurn !== 'him' || this.himRolling) {
       return;
     }
     this.clearHimPlayRollTimersOnly();
@@ -473,20 +524,36 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private beginHerMoveAfterDice(steps: number): void {
-    const maxIdx = Math.max(0, this.trackSlotCount - 1);
+    this.lastDiceRollSteps.her = steps;
+    const finish = this.finalTrackIndex;
     const from = this.herTrackIndex;
-    const to = Math.min(from + steps, maxIdx);
+    if (from + steps > finish) {
+      this.showToast(
+        `♀ Her: need exact dice count to reach the finish — rolled ${steps}, pawn stays; turn passes`,
+      );
+      this.endTurnAfterResolution('her');
+      return;
+    }
+    const to = from + steps;
     this.animateTrackIndex('her', from, to, () => {
-      this.finishLandingAfterMove('her', to);
+      this.finishLandingAfterMove('her', to, { grantBlockPowerOnSkipOpen: true });
     });
   }
 
   private beginHimMoveAfterDice(steps: number): void {
-    const maxIdx = Math.max(0, this.trackSlotCount - 1);
+    this.lastDiceRollSteps.him = steps;
+    const finish = this.finalTrackIndex;
     const from = this.himTrackIndex;
-    const to = Math.min(from + steps, maxIdx);
+    if (from + steps > finish) {
+      this.showToast(
+        `♂ His: need exact dice count to reach the finish — rolled ${steps}, pawn stays; turn passes`,
+      );
+      this.endTurnAfterResolution('him');
+      return;
+    }
+    const to = from + steps;
     this.animateTrackIndex('him', from, to, () => {
-      this.finishLandingAfterMove('him', to);
+      this.finishLandingAfterMove('him', to, { grantBlockPowerOnSkipOpen: true });
     });
   }
 
@@ -524,8 +591,89 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.queueTrackedTimeout(step, TRACK_STEP_MS);
   }
 
-  private finishLandingAfterMove(who: 'her' | 'him', idx: number): void {
+  /**
+   * Block power: max 1 per player. Set when they first open a Skip tile from a dice landing
+   * (not bonus slides or collision bumps). Using power → 0; opening again → 1.
+   */
+  private grantBlockPowerCappedAtOne(who: 'her' | 'him'): void {
+    const label = who === 'her' ? '♀ Her' : '♂ His';
+    if (who === 'her') {
+      this.herBlockPowerStock = 1;
+    } else {
+      this.himBlockPowerStock = 1;
+    }
+    this.showToast(`${label}: Block power (max 1) — opened Block tile`);
+  }
+
+  private finishLandingAfterMove(
+    who: 'her' | 'him',
+    idx: number,
+    opts?: { skipCollisionCheck?: boolean; grantBlockPowerOnSkipOpen?: boolean },
+  ): void {
+    const skipCollisionCheck = opts?.skipCollisionCheck === true;
+    const grantBlockPowerOnSkipOpen = opts?.grantBlockPowerOnSkipOpen === true;
     const maxIdx = Math.max(0, this.trackSlotCount - 1);
+    const other: 'her' | 'him' = who === 'her' ? 'him' : 'her';
+    const otherIdx = other === 'her' ? this.herTrackIndex : this.himTrackIndex;
+
+    // Rule 7: mover shares a cell with the other pawn → other goes back 3, resolves new tile first.
+    // Rule 5: same Block (Skip) tile → safe zone, no bump / no extra task from collision.
+    // Rule 8: bumped player may auto-spend Block power → no bump, no bumped task; mover resolves.
+    // Skip while a collision callback is already queued (avoids broken nested chains, e.g. bonus chains).
+    const landCardForCollision = idx > 0 ? this.getCardAtTrackIndex(idx) : null;
+    const skipCollisionForSafeBlock =
+      landCardForCollision != null && this.isSkipCard(landCardForCollision);
+
+    if (
+      !skipCollisionCheck &&
+      idx > 0 &&
+      otherIdx === idx &&
+      this.afterBumpedResolution == null &&
+      !skipCollisionForSafeBlock
+    ) {
+      const bumped = other;
+      const mover = who;
+
+      // Rule 8 (+ Rule 9): one spend per cycle — same gate as manual “Use Block power”.
+      if (this.canUseBlockPower(bumped)) {
+        if (bumped === 'her') {
+          this.herBlockPowerStock = 0;
+          this.herBlockPowerUsedThisTurn = true;
+        } else {
+          this.himBlockPowerStock = 0;
+          this.himBlockPowerUsedThisTurn = true;
+        }
+        this.showToast(
+          `🛡 ${bumped === 'her' ? '♀ Her' : '♂ His'}: Block power auto — no push back, no collision task`,
+        );
+        this.finishLandingAfterMove(mover, idx, {
+          skipCollisionCheck: true,
+          grantBlockPowerOnSkipOpen: true,
+        });
+        return;
+      }
+
+      const bumpedTo = Math.max(0, idx - COLLISION_PUSH_BACK_STEPS);
+      const savedBumpedRoll = this.lastDiceRollSteps[bumped];
+      const moverRoll = this.lastDiceRollSteps[mover];
+      this.showToast(
+        `${mover === 'her' ? '♀ Her' : '♂ His'} landed on ${bumped === 'her' ? '♀ Her' : '♂ His'} — ${bumped === 'her' ? '♀' : '♂'} back ${COLLISION_PUSH_BACK_STEPS}`,
+      );
+      this.afterBumpedResolution = () => {
+        this.lastDiceRollSteps[bumped] = savedBumpedRoll;
+        this.finishLandingAfterMove(mover, idx, {
+          skipCollisionCheck: true,
+          grantBlockPowerOnSkipOpen: true,
+        });
+      };
+      // Rule 3 penalty on bumped’s forced task uses this turn’s invader dice until collision chain ends.
+      this.lastDiceRollSteps[bumped] = moverRoll;
+      this.animateTrackIndex(bumped, idx, bumpedTo, () => {
+        this.finishLandingAfterMove(bumped, bumpedTo, { grantBlockPowerOnSkipOpen: false });
+      });
+      return;
+    }
+
     const card = this.getCardAtTrackIndex(idx);
 
     if (!card) {
@@ -544,7 +692,7 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
           this.scrollTrackCellIntoView(idx);
           this.queueTrackedTimeout(() => {
             this.animateTrackIndex(who, idx, next, () => {
-              this.finishLandingAfterMove(who, next);
+              this.finishLandingAfterMove(who, next, { grantBlockPowerOnSkipOpen: false });
             });
           }, BONUS_REVEAL_PAUSE_MS);
           return;
@@ -558,8 +706,16 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    if (card.openStatus === 0) {
+    const firstOpenThisLand = card.openStatus === 0;
+    if (firstOpenThisLand) {
       card.openStatus = 1;
+    }
+    if (
+      card.type === LUDOCARD_TYPE_SKIP &&
+      firstOpenThisLand &&
+      grantBlockPowerOnSkipOpen
+    ) {
+      this.grantBlockPowerCappedAtOne(who);
     }
     this.scrollTrackCellIntoView(idx);
     this.offerCardActionModalIfApplicable(card, who, idx);
@@ -631,6 +787,9 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private openCardActionModal(card: LudocardDeckItem, who: 'her' | 'him', trackIndex: number): void {
+    if (this.gameWinner) {
+      return;
+    }
     this.cardActionModalEnter = false;
     this.cardActionModalCard = card;
     this.cardActionModalTrackIndex = trackIndex;
@@ -646,20 +805,48 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   dismissCardActionModal(): void {
-    this.closeCardActionModalAndPassTurn();
+    /* Backdrop / Escape: treat like task done — no penalty (avoids punishing mis-taps). */
+    this.closeCardActionModalAndPassTurn(true);
   }
 
-  /** Wire your game rules (penalties, etc.) here later. */
   onCardActionComplete(): void {
-    this.closeCardActionModalAndPassTurn();
+    this.closeCardActionModalAndPassTurn(true);
   }
 
-  /** Wire your game rules (penalties, etc.) here later. */
+  /** Rule 3: refuse / fail → move back by this turn’s dice roll + 2, then end turn. */
   onCardActionNotComplete(): void {
-    this.closeCardActionModalAndPassTurn();
+    this.closeCardActionModalAndPassTurn(false);
   }
 
-  private closeCardActionModalAndPassTurn(): void {
+  /** Rule 6: spend 1 Block power — skip task and avoid penalty; one spend per turn max. */
+  onUseBlockPowerInModal(): void {
+    const w = this.cardActionModalWho;
+    if (w == null || !this.canUseBlockPower(w)) {
+      return;
+    }
+    if (w === 'her') {
+      this.herBlockPowerStock = 0;
+      this.herBlockPowerUsedThisTurn = true;
+    } else {
+      this.himBlockPowerStock = 0;
+      this.himBlockPowerUsedThisTurn = true;
+    }
+    this.showToast('🛡 Block power — task skipped, no penalty');
+    this.closeCardActionModalAndPassTurn(true);
+  }
+
+  canUseBlockPower(who: 'her' | 'him'): boolean {
+    const stock = who === 'her' ? this.herBlockPowerStock : this.himBlockPowerStock;
+    const used = who === 'her' ? this.herBlockPowerUsedThisTurn : this.himBlockPowerUsedThisTurn;
+    return stock > 0 && !used;
+  }
+
+  get cardActionModalCanUseBlockPower(): boolean {
+    const w = this.cardActionModalWho;
+    return w != null && this.canUseBlockPower(w);
+  }
+
+  private closeCardActionModalAndPassTurn(completedTask: boolean): void {
     const who = this.pendingTurnAfterCardModal;
     this.cardActionModalEnter = false;
     this.cardActionModalOpen = false;
@@ -667,9 +854,26 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cardActionModalTrackIndex = null;
     this.cardActionModalWho = null;
     this.pendingTurnAfterCardModal = null;
-    if (who) {
-      this.endTurnAfterResolution(who);
+    if (!who) {
+      return;
     }
+    if (completedTask) {
+      this.endTurnAfterResolution(who);
+      return;
+    }
+    const rollSteps = this.lastDiceRollSteps[who];
+    const penaltySteps = rollSteps + 2;
+    const from = who === 'her' ? this.herTrackIndex : this.himTrackIndex;
+    const to = Math.max(0, from - penaltySteps);
+    const label = who === 'her' ? '♀ Her' : '♂ His';
+    this.showToast(`${label}: move back ${penaltySteps} (${rollSteps} roll + 2)`);
+    if (from === to) {
+      this.endTurnAfterResolution(who);
+      return;
+    }
+    this.animateTrackIndex(who, from, to, () => {
+      this.endTurnAfterResolution(who);
+    });
   }
 
   get cardActionModalPlayerName(): string {
@@ -691,13 +895,107 @@ export class LudoGamePageComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private endTurnAfterResolution(who: 'her' | 'him'): void {
+    if (this.afterBumpedResolution) {
+      const next = this.afterBumpedResolution;
+      this.afterBumpedResolution = null;
+      this.herMoveBusy = true;
+      this.himMoveBusy = true;
+      next();
+      return;
+    }
     this.herMoveBusy = false;
     this.himMoveBusy = false;
+    /* Fresh spend allowance next time anyone resolves after this roll cycle (incl. collision chains). */
+    this.herBlockPowerUsedThisTurn = false;
+    this.himBlockPowerUsedThisTurn = false;
     if (who === 'her') {
       this.activeTurn = 'him';
     } else {
       this.activeTurn = 'her';
     }
+    this.maybeDeclareWinner();
+  }
+
+  /** Last board index (final space). GO = 0; win = reach here after resolution. */
+  get finalTrackIndex(): number {
+    return Math.max(0, this.trackSlotCount - 1);
+  }
+
+  get winnerHeadline(): string {
+    if (this.gameWinner === 'her') {
+      return `${this.herName} wins!`;
+    }
+    if (this.gameWinner === 'him') {
+      return `${this.hisName} wins!`;
+    }
+    if (this.gameWinner === 'both') {
+      return 'Both reached the finish!';
+    }
+    return '';
+  }
+
+  private maybeDeclareWinner(): void {
+    if (this.gameWinner !== null) {
+      return;
+    }
+    const last = this.finalTrackIndex;
+    if (last < 1) {
+      return;
+    }
+    const herFin = this.herTrackIndex >= last;
+    const himFin = this.himTrackIndex >= last;
+    if (herFin && !himFin) {
+      this.gameWinner = 'her';
+    } else if (himFin && !herFin) {
+      this.gameWinner = 'him';
+    } else if (herFin && himFin) {
+      this.gameWinner = 'both';
+    }
+    if (this.gameWinner !== null) {
+      this.assignWinTauntForOutcome();
+      this.showToast(`🏆 ${this.winnerHeadline}`);
+    }
+  }
+
+  /** Him won → bro/roast-him lines; her won → girl/sis lines; tie → random pool. */
+  private assignWinTauntForOutcome(): void {
+    const w = this.gameWinner;
+    if (w === 'him') {
+      this.winTauntMessage = pickRandomString(WIN_TAUNTS_HIM_WON);
+    } else if (w === 'her') {
+      this.winTauntMessage = pickRandomString(WIN_TAUNTS_HER_WON);
+    } else if (w === 'both') {
+      this.winTauntMessage = pickRandomString(
+        Math.random() < 0.5 ? WIN_TAUNTS_HIM_WON : WIN_TAUNTS_HER_WON,
+      );
+    } else {
+      this.winTauntMessage = '';
+    }
+  }
+
+  /** New round: same couple, fresh board (Rulebook reset). */
+  startNewRound(): void {
+    this.gameWinner = null;
+    this.winTauntMessage = '';
+    this.herTrackIndex = 0;
+    this.himTrackIndex = 0;
+    this.activeTurn = 'her';
+    this.herBlockPowerStock = 0;
+    this.himBlockPowerStock = 0;
+    this.herBlockPowerUsedThisTurn = false;
+    this.himBlockPowerUsedThisTurn = false;
+    this.afterBumpedResolution = null;
+    this.boardFlipTrackIndex = null;
+    this.cardActionModalOpen = false;
+    this.cardActionModalEnter = false;
+    this.cardActionModalCard = null;
+    this.cardActionModalTrackIndex = null;
+    this.cardActionModalWho = null;
+    this.pendingTurnAfterCardModal = null;
+    for (const c of this.deck.cards) {
+      c.openStatus = 0;
+    }
+    this.showToast('New round — board reset');
   }
 
   private clearHerPlayRollTimersOnly(): void {
