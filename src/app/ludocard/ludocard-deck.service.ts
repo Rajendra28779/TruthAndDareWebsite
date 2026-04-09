@@ -45,7 +45,7 @@ export class LudocardDeckService {
     { id: 19, value: 'Do your Job ! Blow Job', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/blowjob1.png', openStatus: 1 },
     { id: 20, value: 'Face under throne', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Faceunderthrone.jpg', openStatus: 1 },
     { id: 21, value: 'Face off', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Faceoff.jpg', openStatus: 1 },
-    { id: 22, value: 'Nill Down', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Standing0.svg', openStatus: 1 },
+    { id: 22, value: 'Nill Down', type: LUDOCARD_TYPE_CARD, img: 'assets/xpic/Standing0.jpg', openStatus: 1 },
     { id: 23, value: 'Bonus +3', type: LUDOCARD_TYPE_BONUS, img: null, bonus: 3, openStatus: 1 },
     { id: 24, value: 'Spank On your partner Back And feel it.', type: LUDOCARD_TYPE_DARE, img: 'assets/ludocard/ludocard-24.svg', openStatus: 1 },
     { id: 25, value: "Stay close to eachother's lips but try not to kiss till 10 sec", type: LUDOCARD_TYPE_DARE, img: 'assets/xpic/ludocard-25.svg', openStatus: 1 },
